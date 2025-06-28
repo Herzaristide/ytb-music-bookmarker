@@ -57,58 +57,75 @@
 /* Unified Control Panel Styles */
 .ytmusic-unified-control-panel {
   position: fixed !important;
-  bottom: 20px !important;
-  left: 20px !important;
-  background: rgba(18, 18, 18, 0.95) !important;
-  backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(255, 23, 68, 0.3) !important;
-  border-radius: 12px !important;
-  padding: 16px !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: rgba(3, 3, 3, 0.98) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
   z-index: 9998 !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
-  min-width: 320px !important;
-  max-width: 380px !important;
-  font-family: 'YouTube Sans', Roboto, Arial, sans-serif !important;
-  transition: all 0.3s ease !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+  min-width: 340px !important;
+  max-width: 400px !important;
+  font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont,
+    sans-serif !important;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
   color: #ffffff !important;
+  border-top: 2px solid rgba(255, 23, 68, 0.4) !important;
 }
 
 .ytmusic-unified-control-panel.collapsed {
-  min-width: 60px !important;
-  padding: 12px !important;
+  min-width: 64px !important;
+  padding: 16px !important;
+  transform: translateX(-50%) translateY(-75%) !important;
+  border-radius: 20px !important;
+  background: rgba(3, 3, 3, 0.95) !important;
 }
 
 .ytmusic-panel-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 20px !important;
   color: #ffffff !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  cursor: move !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
   user-select: none !important;
-  padding: 4px 8px !important;
-  border-radius: 6px !important;
+  -webkit-user-select: none !important;
+  padding: 8px 12px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 .ytmusic-panel-header:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .ytmusic-panel-toggle {
-  background: none !important;
-  border: none !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: #ffffff !important;
   cursor: pointer !important;
-  font-size: 16px !important;
-  padding: 4px !important;
-  border-radius: 4px !important;
-  transition: background 0.2s ease !important;
+  font-size: 14px !important;
+  padding: 6px 8px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  min-width: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .ytmusic-panel-toggle:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: scale(1.05) !important;
 }
 
 .ytmusic-panel-content {
@@ -120,11 +137,20 @@
 }
 
 .ytmusic-panel-collapsed-icon {
-  font-size: 18px !important;
+  font-size: 20px !important;
   color: #ffffff !important;
   cursor: pointer !important;
   display: none !important;
   text-align: center !important;
+  padding: 4px !important;
+  border-radius: 12px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.ytmusic-panel-collapsed-icon:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: scale(1.1) !important;
 }
 
 .ytmusic-unified-control-panel.collapsed .ytmusic-panel-collapsed-icon {
@@ -136,23 +162,33 @@
 }
 
 .ytmusic-section {
-  margin-bottom: 16px !important;
-  padding-bottom: 12px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  margin-bottom: 20px !important;
+  padding: 16px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.ytmusic-section:hover {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .ytmusic-section:last-child {
   margin-bottom: 0 !important;
-  border-bottom: none !important;
 }
 
 .ytmusic-section-title {
-  font-size: 12px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-  margin-bottom: 8px !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin-bottom: 12px !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
 }
 
 .ytmusic-speed-controls {
@@ -163,27 +199,33 @@
 }
 
 .ytmusic-speed-btn {
-  background: linear-gradient(135deg, #333333, #404040) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
-  padding: 6px 10px !important;
-  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
   font-size: 11px !important;
   font-weight: 500 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
-  min-width: 40px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  min-width: 42px !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
 .ytmusic-speed-btn:hover {
-  background: linear-gradient(135deg, #404040, #505050) !important;
-  border-color: rgba(255, 23, 68, 0.3) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
 .ytmusic-speed-btn.active {
   background: linear-gradient(135deg, #ff1744, #d50000) !important;
-  border-color: rgba(255, 23, 68, 0.5) !important;
-  box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3) !important;
+  border-color: rgba(255, 23, 68, 0.8) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(255, 23, 68, 0.4) !important;
+  transform: translateY(-1px) !important;
 }
 
 .ytmusic-speed-slider-container {
@@ -195,35 +237,50 @@
 .ytmusic-speed-slider {
   flex: 1 !important;
   -webkit-appearance: none !important;
-  height: 6px !important;
-  border-radius: 3px !important;
-  background: linear-gradient(135deg, #333333, #404040) !important;
+  appearance: none !important;
+  height: 8px !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   outline: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.ytmusic-speed-slider:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .ytmusic-speed-slider::-webkit-slider-thumb {
   -webkit-appearance: none !important;
   appearance: none !important;
-  width: 16px !important;
-  height: 16px !important;
+  width: 20px !important;
+  height: 20px !important;
   border-radius: 50% !important;
   background: linear-gradient(135deg, #ff1744, #d50000) !important;
   cursor: pointer !important;
-  border: 2px solid #ffffff !important;
-  box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3) !important;
+  border: 3px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 2px 12px rgba(255, 23, 68, 0.4), 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.ytmusic-speed-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 16px rgba(255, 23, 68, 0.6), 0 0 0 2px rgba(0, 0, 0, 0.1) !important;
 }
 
 .ytmusic-speed-value {
   color: #ffffff !important;
   font-size: 12px !important;
   font-weight: 600 !important;
-  min-width: 45px !important;
+  min-width: 50px !important;
   text-align: center !important;
-  background: linear-gradient(135deg, #333333, #404040) !important;
-  padding: 6px 8px !important;
-  border-radius: 6px !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  padding: 8px 10px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
 .ytmusic-marker-controls {
@@ -236,47 +293,85 @@
 .ytmusic-add-marker-btn-panel,
 .ytmusic-clear-markers-btn,
 .ytmusic-refresh-markers-btn {
-  background: linear-gradient(135deg, #333333, #404040) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
-  padding: 6px 10px !important;
-  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
   font-size: 11px !important;
   font-weight: 500 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   flex: 1 !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .ytmusic-add-marker-btn-panel:hover,
 .ytmusic-clear-markers-btn:hover,
 .ytmusic-refresh-markers-btn:hover {
-  background: linear-gradient(135deg, #404040, #505050) !important;
-  border-color: rgba(255, 23, 68, 0.3) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
 }
 
 .ytmusic-add-marker-btn-panel {
   background: linear-gradient(135deg, #ff1744, #d50000) !important;
+  border-color: rgba(255, 23, 68, 0.8) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.ytmusic-add-marker-btn-panel:hover {
+  background: linear-gradient(135deg, #ff1744, #b71c1c) !important;
+  box-shadow: 0 6px 20px rgba(255, 23, 68, 0.4) !important;
 }
 
 .ytmusic-current-time {
   text-align: center !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   font-weight: 600 !important;
   color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.05) !important;
-  padding: 8px !important;
-  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  padding: 12px 16px !important;
+  border-radius: 12px !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: 0.5px !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
 .ytmusic-marker-list {
-  max-height: 150px !important;
+  max-height: 160px !important;
   overflow-y: auto !important;
-  margin-bottom: 10px !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px !important;
-  background: rgba(0, 0, 0, 0.2) !important;
+  margin-bottom: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.ytmusic-marker-list::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.ytmusic-marker-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 3px !important;
+}
+
+.ytmusic-marker-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 3px !important;
+}
+
+.ytmusic-marker-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
 }
 
 .ytmusic-no-markers {
@@ -288,16 +383,18 @@
 }
 
 .ytmusic-marker-item {
-  padding: 8px 12px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  transition: background 0.2s ease !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: rgba(255, 255, 255, 0.01) !important;
 }
 
 .ytmusic-marker-item:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  transform: translateX(2px) !important;
 }
 
 .ytmusic-marker-item:last-child {
@@ -329,25 +426,33 @@
 .ytmusic-goto-marker,
 .ytmusic-edit-marker,
 .ytmusic-delete-marker {
-  background: none !important;
-  border: none !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   font-size: 12px !important;
   cursor: pointer !important;
-  padding: 2px 4px !important;
-  border-radius: 3px !important;
-  transition: background 0.2s ease !important;
+  padding: 6px 8px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
 }
 
 .ytmusic-goto-marker:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(76, 175, 80, 0.2) !important;
+  border-color: rgba(76, 175, 80, 0.4) !important;
+  transform: scale(1.05) !important;
 }
 
 .ytmusic-edit-marker:hover {
   background: rgba(255, 193, 7, 0.2) !important;
+  border-color: rgba(255, 193, 7, 0.4) !important;
+  transform: scale(1.05) !important;
 }
 
 .ytmusic-delete-marker:hover {
-  background: rgba(255, 0, 0, 0.2) !important;
+  background: rgba(244, 67, 54, 0.2) !important;
+  border-color: rgba(244, 67, 54, 0.4) !important;
+  transform: scale(1.05) !important;
 }
 
 .ytmusic-navigation-controls {
@@ -357,27 +462,24 @@
 
 .ytmusic-prev-marker-btn,
 .ytmusic-next-marker-btn {
-  background: linear-gradient(135deg, #333333, #404040) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: #ffffff !important;
-  padding: 6px 10px !important;
-  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  padding: 10px 16px !important;
+  border-radius: 10px !important;
   font-size: 11px !important;
   font-weight: 500 !important;
   cursor: pointer !important;
-  transition: all 0.2s ease !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
   flex: 1 !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
 .ytmusic-prev-marker-btn:hover,
 .ytmusic-next-marker-btn:hover {
-  background: linear-gradient(135deg, #404040, #505050) !important;
-  border-color: rgba(255, 23, 68, 0.3) !important;
-}
-
-.ytmusic-unified-control-panel.dragging {
-  transition: none !important;
-  user-select: none !important;
-  pointer-events: auto !important;
-  z-index: 10000 !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
 }

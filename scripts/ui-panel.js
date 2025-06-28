@@ -31,7 +31,6 @@ class UIPanel {
 
     await this.initialize();
     this.attachEventListeners();
-    this.makeDraggable();
     this.startTimeUpdates();
     this.updateMarkerList();
 
@@ -103,17 +102,10 @@ class UIPanel {
       // Set speed UI
       this.updateSpeedUI(speedSettings);
 
-      // Apply panel settings
+      // Apply panel settings (only collapse state, not position)
       if (panelSettings.panelCollapsed) {
         this.panel.classList.add('collapsed');
         this.panel.querySelector('.ytmusic-panel-toggle').textContent = '+';
-      }
-
-      // Apply saved position
-      if (panelSettings.panelPosition) {
-        const { left, bottom } = panelSettings.panelPosition;
-        this.panel.style.setProperty('left', `${left}px`, 'important');
-        this.panel.style.setProperty('bottom', `${bottom}px`, 'important');
       }
     } catch (error) {
       console.error('Error initializing panel:', error);
@@ -273,115 +265,6 @@ class UIPanel {
     } catch (error) {
       console.error('Error updating marker list:', error);
     }
-  }
-
-  makeDraggable() {
-    let isDragging = false;
-    let startX, startY, startLeft, startTop;
-
-    const header = this.panel.querySelector('.ytmusic-panel-header');
-    const collapsedIcon = this.panel.querySelector(
-      '.ytmusic-panel-collapsed-icon'
-    );
-
-    const startDrag = (e) => {
-      if (
-        e.target.closest('.ytmusic-panel-toggle') ||
-        e.target.closest('.ytmusic-speed-btn') ||
-        e.target.closest('.ytmusic-speed-slider') ||
-        e.target.closest('button')
-      ) {
-        return;
-      }
-
-      isDragging = true;
-      this.panel.classList.add('dragging');
-
-      startX = e.clientX || (e.touches && e.touches[0].clientX);
-      startY = e.clientY || (e.touches && e.touches[0].clientY);
-
-      const rect = this.panel.getBoundingClientRect();
-      startLeft = rect.left;
-      startTop = rect.top;
-
-      this.panel.style.setProperty('position', 'fixed', 'important');
-      this.panel.style.setProperty('top', `${startTop}px`, 'important');
-      this.panel.style.setProperty('left', `${startLeft}px`, 'important');
-      this.panel.style.removeProperty('bottom');
-
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    const drag = (e) => {
-      if (!isDragging) return;
-
-      const currentX = e.clientX || (e.touches && e.touches[0].clientX);
-      const currentY = e.clientY || (e.touches && e.touches[0].clientY);
-
-      if (!currentX || !currentY) return;
-
-      const deltaX = currentX - startX;
-      const deltaY = currentY - startY;
-
-      let newLeft = startLeft + deltaX;
-      let newTop = startTop + deltaY;
-
-      const padding = 10;
-      const rect = this.panel.getBoundingClientRect();
-      const maxLeft = window.innerWidth - rect.width - padding;
-      const maxTop = window.innerHeight - rect.height - padding;
-
-      newLeft = Math.max(padding, Math.min(newLeft, maxLeft));
-      newTop = Math.max(padding, Math.min(newTop, maxTop));
-
-      this.panel.style.setProperty('left', `${newLeft}px`, 'important');
-      this.panel.style.setProperty('top', `${newTop}px`, 'important');
-
-      e.preventDefault();
-      e.stopPropagation();
-    };
-
-    const stopDrag = async () => {
-      if (!isDragging) return;
-
-      isDragging = false;
-      this.panel.classList.remove('dragging');
-
-      const rect = this.panel.getBoundingClientRect();
-      const finalLeft = rect.left;
-      const finalBottom = window.innerHeight - rect.bottom;
-
-      this.panel.style.setProperty('bottom', `${finalBottom}px`, 'important');
-      this.panel.style.setProperty('left', `${finalLeft}px`, 'important');
-      this.panel.style.removeProperty('top');
-
-      try {
-        await StorageManager.savePanelSettings({
-          panelPosition: { left: finalLeft, bottom: finalBottom },
-        });
-      } catch (error) {
-        console.error('Error saving panel position:', error);
-      }
-    };
-
-    if (header) {
-      header.addEventListener('mousedown', startDrag, { passive: false });
-      header.addEventListener('touchstart', startDrag, { passive: false });
-    }
-    if (collapsedIcon) {
-      collapsedIcon.addEventListener('mousedown', startDrag, {
-        passive: false,
-      });
-      collapsedIcon.addEventListener('touchstart', startDrag, {
-        passive: false,
-      });
-    }
-
-    document.addEventListener('mousemove', drag, { passive: false });
-    document.addEventListener('mouseup', stopDrag);
-    document.addEventListener('touchmove', drag, { passive: false });
-    document.addEventListener('touchend', stopDrag);
   }
 
   startTimeUpdates() {
