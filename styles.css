@@ -81,3 +81,157 @@
 .ytmusic-add-marker-btn:active {
   transform: scale(0.95);
 }
+
+/* Speed Control Overlay */
+.ytmusic-speed-control-overlay {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 20px !important;
+  background: rgba(18, 18, 18, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 23, 68, 0.3) !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  z-index: 9998 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  min-width: 280px !important;
+  font-family: 'YouTube Sans', Roboto, Arial, sans-serif !important;
+  transition: all 0.3s ease !important;
+}
+
+.ytmusic-speed-control-overlay.collapsed {
+  min-width: 60px !important;
+  padding: 12px !important;
+}
+
+.ytmusic-speed-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 12px !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.ytmusic-speed-toggle {
+  background: none !important;
+  border: none !important;
+  color: #ffffff !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  padding: 4px !important;
+  border-radius: 4px !important;
+  transition: background 0.2s ease !important;
+}
+
+.ytmusic-speed-toggle:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ytmusic-speed-controls-web {
+  display: flex !important;
+  gap: 6px !important;
+  margin-bottom: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+.ytmusic-speed-controls-web.hidden {
+  display: none !important;
+}
+
+.ytmusic-speed-btn-web {
+  background: linear-gradient(135deg, #333333, #404040) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  min-width: 38px !important;
+}
+
+.ytmusic-speed-btn-web:hover {
+  background: linear-gradient(135deg, #404040, #505050) !important;
+  border-color: rgba(255, 23, 68, 0.3) !important;
+}
+
+.ytmusic-speed-btn-web.active {
+  background: linear-gradient(135deg, #ff1744, #d50000) !important;
+  border-color: rgba(255, 23, 68, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3) !important;
+}
+
+.ytmusic-speed-slider-container-web {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.ytmusic-speed-slider-container-web.hidden {
+  display: none !important;
+}
+
+.ytmusic-speed-slider-web {
+  flex: 1 !important;
+  -webkit-appearance: none !important;
+  height: 6px !important;
+  border-radius: 3px !important;
+  background: linear-gradient(135deg, #333333, #404040) !important;
+  outline: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  min-width: 120px !important;
+}
+
+.ytmusic-speed-slider-web::-webkit-slider-thumb {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #ff1744, #d50000) !important;
+  cursor: pointer !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3) !important;
+}
+
+.ytmusic-speed-slider-web::-moz-range-thumb {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #ff1744, #d50000) !important;
+  cursor: pointer !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3) !important;
+}
+
+.ytmusic-speed-value-web {
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  min-width: 45px !important;
+  text-align: center !important;
+  background: linear-gradient(135deg, #333333, #404040) !important;
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.ytmusic-speed-collapsed-icon {
+  font-size: 18px !important;
+  color: #ffffff !important;
+  cursor: pointer !important;
+  display: none !important;
+}
+
+.ytmusic-speed-control-overlay.collapsed .ytmusic-speed-collapsed-icon {
+  display: block !important;
+}
+
+.ytmusic-speed-control-overlay.collapsed .ytmusic-speed-header,
+.ytmusic-speed-control-overlay.collapsed .ytmusic-speed-controls-web,
+.ytmusic-speed-control-overlay.collapsed .ytmusic-speed-slider-container-web {
+  display: none !important;
+}

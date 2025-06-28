@@ -501,6 +501,157 @@ function ensureButtonExists() {
   }
 }
 
+// Apply stored speed when video loads
+function applyStoredPlaybackSpeed() {
+  chrome.storage.local.get({ playbackSpeed: 1 }, (data) => {
+    const video = document.querySelector('video');
+    if (video && data.playbackSpeed !== 1) {
+      video.playbackRate = data.playbackSpeed;
+      console.log(`Applied stored playback speed: ${data.playbackSpeed}x`);
+    }
+  });
+}
+
+// Create speed control overlay on the web interface
+function createSpeedControlOverlay() {
+  // Remove existing overlay if any
+  const existingOverlay = document.querySelector(
+    '.ytmusic-speed-control-overlay'
+  );
+  if (existingOverlay) {
+    existingOverlay.remove();
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'ytmusic-speed-control-overlay';
+  overlay.innerHTML = `
+    <div class="ytmusic-speed-header">
+      <span>🎛️ Speed</span>
+      <button class="ytmusic-speed-toggle">−</button>
+    </div>
+    <div class="ytmusic-speed-controls-web">
+      <button class="ytmusic-speed-btn-web" data-speed="0.5">0.5x</button>
+      <button class="ytmusic-speed-btn-web" data-speed="0.75">0.75x</button>
+      <button class="ytmusic-speed-btn-web active" data-speed="1">1x</button>
+      <button class="ytmusic-speed-btn-web" data-speed="1.25">1.25x</button>
+      <button class="ytmusic-speed-btn-web" data-speed="1.5">1.5x</button>
+      <button class="ytmusic-speed-btn-web" data-speed="2">2x</button>
+    </div>
+    <div class="ytmusic-speed-slider-container-web">
+      <input type="range" class="ytmusic-speed-slider-web" min="0.25" max="3" step="0.05" value="1">
+      <span class="ytmusic-speed-value-web">1.00x</span>
+    </div>
+    <div class="ytmusic-speed-collapsed-icon">🎛️</div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Get elements
+  const speedBtns = overlay.querySelectorAll('.ytmusic-speed-btn-web');
+  const speedSlider = overlay.querySelector('.ytmusic-speed-slider-web');
+  const speedValue = overlay.querySelector('.ytmusic-speed-value-web');
+  const toggleBtn = overlay.querySelector('.ytmusic-speed-toggle');
+  const collapsedIcon = overlay.querySelector('.ytmusic-speed-collapsed-icon');
+
+  // Load and apply stored speed
+  chrome.storage.local.get(
+    { playbackSpeed: 1, speedOverlayCollapsed: false },
+    (data) => {
+      const currentSpeed = data.playbackSpeed;
+      speedSlider.value = currentSpeed;
+      speedValue.textContent = `${currentSpeed.toFixed(2)}x`;
+
+      // Update active button
+      speedBtns.forEach((btn) => {
+        btn.classList.toggle(
+          'active',
+          parseFloat(btn.dataset.speed) === currentSpeed
+        );
+      });
+
+      // Apply collapsed state
+      if (data.speedOverlayCollapsed) {
+        overlay.classList.add('collapsed');
+        toggleBtn.textContent = '+';
+      }
+    }
+  );
+
+  // Speed button listeners
+  speedBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const speed = parseFloat(btn.dataset.speed);
+      setVideoPlaybackSpeed(speed);
+
+      // Update UI
+      speedBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      speedSlider.value = speed;
+      speedValue.textContent = `${speed.toFixed(2)}x`;
+    });
+  });
+
+  // Speed slider listener
+  speedSlider.addEventListener('input', () => {
+    const speed = parseFloat(speedSlider.value);
+    setVideoPlaybackSpeed(speed);
+    speedValue.textContent = `${speed.toFixed(2)}x`;
+
+    // Update active button if it matches a preset
+    speedBtns.forEach((btn) => {
+      btn.classList.toggle(
+        'active',
+        Math.abs(parseFloat(btn.dataset.speed) - speed) < 0.01
+      );
+    });
+  });
+
+  // Toggle collapse/expand
+  const toggleOverlay = () => {
+    overlay.classList.toggle('collapsed');
+    const isCollapsed = overlay.classList.contains('collapsed');
+    toggleBtn.textContent = isCollapsed ? '+' : '−';
+    chrome.storage.local.set({ speedOverlayCollapsed: isCollapsed });
+  };
+
+  toggleBtn.addEventListener('click', toggleOverlay);
+  collapsedIcon.addEventListener('click', toggleOverlay);
+
+  console.log('Speed control overlay created');
+  return overlay;
+}
+
+// Ensure speed overlay exists
+function ensureSpeedOverlayExists() {
+  const existingOverlay = document.querySelector(
+    '.ytmusic-speed-control-overlay'
+  );
+  if (!existingOverlay || !document.body.contains(existingOverlay)) {
+    console.log('Speed overlay missing, recreating...');
+    createSpeedControlOverlay();
+  }
+}
+
+// Update web speed overlay UI
+function updateWebSpeedOverlay(speed) {
+  const overlay = document.querySelector('.ytmusic-speed-control-overlay');
+  if (!overlay) return;
+
+  const speedBtns = overlay.querySelectorAll('.ytmusic-speed-btn-web');
+  const speedSlider = overlay.querySelector('.ytmusic-speed-slider-web');
+  const speedValue = overlay.querySelector('.ytmusic-speed-value-web');
+
+  if (speedSlider) speedSlider.value = speed;
+  if (speedValue) speedValue.textContent = `${speed.toFixed(2)}x`;
+
+  speedBtns.forEach((btn) => {
+    btn.classList.toggle(
+      'active',
+      Math.abs(parseFloat(btn.dataset.speed) - speed) < 0.01
+    );
+  });
+}
+
 function initializeExtension() {
   if (isInitialized) return;
   isInitialized = true;
@@ -510,14 +661,24 @@ function initializeExtension() {
   // Create add marker button
   createAddMarkerButton();
 
+  // Create speed control overlay
+  createSpeedControlOverlay();
+
   // Apply stored playback speed
   setTimeout(applyStoredPlaybackSpeed, 1000);
 
-  // Ensure button stays visible - check every 5 seconds
+  // Ensure button and overlay stay visible - check every 5 seconds
   setInterval(ensureButtonExists, 5000);
+  setInterval(ensureSpeedOverlayExists, 5000);
 
   // Initial display of markers with longer delay
   setTimeout(displayMarkersOnProgressBar, 4000);
+
+  // Create speed control overlay
+  setTimeout(createSpeedControlOverlay, 2000);
+
+  // Ensure speed overlay exists
+  setInterval(ensureSpeedOverlayExists, 5000);
 
   // Watch for URL changes (more efficient than watching DOM changes)
   let currentUrl = window.location.href;
@@ -538,6 +699,41 @@ function initializeExtension() {
       if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
         e.preventDefault();
         addMarkerAtCurrentTime();
+      }
+    }
+
+    // Speed control shortcuts (Ctrl + number keys)
+    if (e.ctrlKey && !e.altKey && !e.shiftKey) {
+      const speedMap = {
+        1: 0.5,
+        2: 0.75,
+        3: 1,
+        4: 1.25,
+        5: 1.5,
+        6: 2,
+      };
+
+      if (speedMap[e.key]) {
+        e.preventDefault();
+        setVideoPlaybackSpeed(speedMap[e.key]);
+        updateWebSpeedOverlay(speedMap[e.key]);
+      }
+    }
+
+    // Toggle speed overlay with Ctrl+Shift+S
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
+      e.preventDefault();
+      const overlay = document.querySelector('.ytmusic-speed-control-overlay');
+      if (overlay) {
+        const toggleBtn = overlay.querySelector('.ytmusic-speed-toggle');
+        const collapsedIcon = overlay.querySelector(
+          '.ytmusic-speed-collapsed-icon'
+        );
+        if (toggleBtn) {
+          toggleBtn.click();
+        } else if (collapsedIcon) {
+          collapsedIcon.click();
+        }
       }
     }
   });
@@ -668,45 +864,6 @@ function showSpeedNotification(speed) {
     }, 300);
   }, 2000);
 }
-
-// Apply stored speed when video loads
-function applyStoredPlaybackSpeed() {
-  chrome.storage.local.get({ playbackSpeed: 1 }, (data) => {
-    const video = document.querySelector('video');
-    if (video && data.playbackSpeed !== 1) {
-      video.playbackRate = data.playbackSpeed;
-      console.log(`Applied stored playback speed: ${data.playbackSpeed}x`);
-    }
-  });
-}
-
-// Keyboard shortcuts for speed control
-document.addEventListener('keydown', (e) => {
-  if (e.key.toLowerCase() === 'm' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
-    // Only if not typing in an input field
-    if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-      e.preventDefault();
-      addMarkerAtCurrentTime();
-    }
-  }
-
-  // Speed control shortcuts (Ctrl + number keys)
-  if (e.ctrlKey && !e.altKey && !e.shiftKey) {
-    const speedMap = {
-      1: 0.5,
-      2: 0.75,
-      3: 1,
-      4: 1.25,
-      5: 1.5,
-      6: 2,
-    };
-
-    if (speedMap[e.key]) {
-      e.preventDefault();
-      setVideoPlaybackSpeed(speedMap[e.key]);
-    }
-  }
-});
 
 // Initialize when page is ready
 if (document.readyState === 'loading') {

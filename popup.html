@@ -415,6 +415,64 @@
       border-radius: 6px;
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
+    
+    /* Horizontal layout for marker button and speed slider */
+    .marker-speed-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .marker-speed-row .add-btn {
+      flex: 1;
+      min-width: 180px;
+    }
+    
+    .speed-slider-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+    }
+    
+    .speed-slider-inline .speed-slider {
+      flex: 1;
+      min-width: 80px;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #333333, #404040);
+      outline: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .speed-slider-inline .speed-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
+    }
+    
+    .speed-slider-inline .speed-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
+    }
+    
+    .speed-slider-inline .speed-value {
+      font-size: 11px;
+      padding: 4px 8px;
+      min-width: 40px;
+    }
   </style>
 </head>
 <body>
@@ -430,7 +488,13 @@
         <div><strong>Time:</strong> <span id="currentTime"></span></div>
       </div>
       <div class="add-marker-section">
-        <button id="addTimecodeBtn" class="add-btn" style="width: 100%;">➕ Add Quick Marker</button>
+        <div class="marker-speed-row">
+          <button id="addTimecodeBtn" class="add-btn">➕ Add Quick Marker</button>
+          <div class="speed-slider-inline">
+            <input type="range" id="speedSlider" class="speed-slider" min="0.25" max="3" step="0.05" value="1">
+            <span id="speedValue" class="speed-value">1.00x</span>
+          </div>
+        </div>
       </div>
       
       <!-- Playback Speed Controls -->
@@ -443,10 +507,6 @@
           <button class="speed-btn" data-speed="1.25">1.25x</button>
           <button class="speed-btn" data-speed="1.5">1.5x</button>
           <button class="speed-btn" data-speed="2">2x</button>
-        </div>
-        <div class="speed-slider-container">
-          <input type="range" id="speedSlider" class="speed-slider" min="0.25" max="3" step="0.05" value="1">
-          <span id="speedValue" class="speed-value">1.00x</span>
         </div>
       </div>
       
