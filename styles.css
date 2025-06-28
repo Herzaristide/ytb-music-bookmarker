@@ -54,111 +54,123 @@
   opacity: 1;
 }
 
+/* YouTube Music Controls Toggle Button */
+.ytmusic-header-control-toggle {
+  position: fixed !important;
+  top: 16px !important;
+  left: 180px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 20px !important;
+  padding: 8px 16px !important;
+  z-index: 9999 !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont,
+    sans-serif !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Responsive positioning for different screen sizes */
+@media (max-width: 1200px) {
+  .ytmusic-header-control-toggle {
+    left: 120px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .ytmusic-header-control-toggle {
+    left: 80px !important;
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+  }
+
+  .ytmusic-header-control-toggle .label {
+    display: none !important;
+  }
+}
+
+.ytmusic-header-control-toggle:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ytmusic-header-control-toggle.active {
+  background: linear-gradient(135deg, #ff1744, #d50000) !important;
+  border-color: rgba(255, 23, 68, 0.8) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(255, 23, 68, 0.4) !important;
+}
+
+.ytmusic-header-control-toggle .icon {
+  font-size: 16px !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.ytmusic-header-control-toggle.active .icon {
+  transform: rotate(180deg) !important;
+}
+
 /* Unified Control Panel Styles */
 .ytmusic-unified-control-panel {
   position: fixed !important;
-  top: 20px !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
+  top: 60px !important;
+  left: 180px !important;
   background: rgba(3, 3, 3, 0.98) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 16px !important;
   padding: 20px !important;
   z-index: 9998 !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3),
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
-  min-width: 340px !important;
-  max-width: 400px !important;
+  min-width: 320px !important;
+  max-width: 380px !important;
   font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont,
     sans-serif !important;
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
   color: #ffffff !important;
   border-top: 2px solid rgba(255, 23, 68, 0.4) !important;
+  transform: translateY(-20px) scale(0.95) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
-.ytmusic-unified-control-panel.collapsed {
-  min-width: 64px !important;
-  padding: 16px !important;
-  transform: translateX(-50%) translateY(-75%) !important;
-  border-radius: 20px !important;
-  background: rgba(3, 3, 3, 0.95) !important;
+.ytmusic-unified-control-panel.visible {
+  transform: translateY(0) scale(1) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
-.ytmusic-panel-header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  margin-bottom: 20px !important;
-  color: #ffffff !important;
-  font-size: 15px !important;
-  font-weight: 500 !important;
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  padding: 8px 12px !important;
-  border-radius: 12px !important;
-  background: rgba(255, 255, 255, 0.02) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+/* Responsive positioning for different screen sizes */
+@media (max-width: 1200px) {
+  .ytmusic-unified-control-panel {
+    left: 120px !important;
+  }
 }
 
-.ytmusic-panel-header:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-.ytmusic-panel-toggle {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: #ffffff !important;
-  cursor: pointer !important;
-  font-size: 14px !important;
-  padding: 6px 8px !important;
-  border-radius: 8px !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  min-width: 28px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.ytmusic-panel-toggle:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
-  transform: scale(1.05) !important;
-}
-
-.ytmusic-panel-content {
-  display: block !important;
-}
-
-.ytmusic-unified-control-panel.collapsed .ytmusic-panel-content {
-  display: none !important;
-}
-
-.ytmusic-panel-collapsed-icon {
-  font-size: 20px !important;
-  color: #ffffff !important;
-  cursor: pointer !important;
-  display: none !important;
-  text-align: center !important;
-  padding: 4px !important;
-  border-radius: 12px !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  background: rgba(255, 255, 255, 0.05) !important;
-}
-
-.ytmusic-panel-collapsed-icon:hover {
-  background: rgba(255, 255, 255, 0.1) !important;
-  transform: scale(1.1) !important;
-}
-
-.ytmusic-unified-control-panel.collapsed .ytmusic-panel-collapsed-icon {
-  display: block !important;
-}
-
-.ytmusic-unified-control-panel.collapsed .ytmusic-panel-header {
-  display: none !important;
+@media (max-width: 768px) {
+  .ytmusic-unified-control-panel {
+    left: 20px !important;
+    right: 20px !important;
+    min-width: auto !important;
+    max-width: none !important;
+  }
 }
 
 .ytmusic-section {
