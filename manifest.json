@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Music Timecode Markers",
+  "version": "3.0",
+  "description": "Add visual timecode indicators to YouTube Music progress bar and control playback speed.",
+  "permissions": ["storage", "activeTab"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://music.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ]
+}

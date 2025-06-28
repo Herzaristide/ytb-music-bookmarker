@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouTube Music Markers Manager</title>
+  <style>
+    body { 
+      font-family: 'YouTube Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      padding: 0;
+      margin: 0;
+      width: 500px; 
+      min-height: 400px;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+      color: #ffffff;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.1) 100%);
+      pointer-events: none;
+    }
+    
+    .header h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .content {
+      padding: 24px;
+    }
+    
+    .current-video {
+      background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+      border: 1px solid rgba(255, 23, 68, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+    }
+    
+    .current-video h3 {
+      margin: 0 0 12px 0;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .video-info {
+      font-size: 13px;
+      color: #b3b3b3;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    
+    .video-info strong {
+      color: #ff1744;
+      font-weight: 600;
+    }
+    
+    .add-marker-section {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .add-btn {
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 16px rgba(255, 23, 68, 0.3);
+      font-family: inherit;
+    }
+    
+    .add-btn:hover {
+      background: linear-gradient(135deg, #ff1744, #b71c1c);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 23, 68, 0.4);
+    }
+    
+    .add-btn:active {
+      transform: translateY(0);
+    }
+    
+    .markers-section {
+      background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    
+    .markers-header {
+      background: linear-gradient(135deg, #2a2a2a, #333333);
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 23, 68, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .markers-header h3 {
+      margin: 0;
+      font-size: 16px;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    
+    .markers-count {
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
+    }
+    
+    .markers-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .markers-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .markers-list::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .markers-list::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      border-radius: 3px;
+    }
+    
+    .video-group {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .video-group:last-child {
+      border-bottom: none;
+    }
+    
+    .video-title {
+      background: linear-gradient(135deg, #333333, #404040);
+      padding: 12px 20px;
+      font-weight: 600;
+      font-size: 13px;
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 23, 68, 0.2);
+    }
+    
+    .marker-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: transparent;
+    }
+    
+    .marker-item:hover {
+      background: rgba(255, 23, 68, 0.05);
+      border-color: rgba(255, 23, 68, 0.1);
+    }
+    
+    .marker-item:last-child {
+      border-bottom: none;
+    }
+    
+    .marker-time {
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      min-width: 50px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+    }
+    
+    .marker-time:hover {
+      background: linear-gradient(135deg, #ff1744, #b71c1c);
+      transform: scale(1.05);
+      box-shadow: 0 4px 16px rgba(255, 23, 68, 0.5);
+    }
+    
+    .marker-note {
+      flex: 1;
+      font-size: 13px;
+      color: #b3b3b3;
+      font-style: italic;
+      line-height: 1.4;
+    }
+    
+    .marker-note.empty {
+      color: #666666;
+    }
+    
+    .marker-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .action-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+      font-family: inherit;
+    }
+    
+    .edit-btn {
+      color: #4fc3f7;
+      border-color: rgba(79, 195, 247, 0.3);
+    }
+    
+    .edit-btn:hover {
+      background: rgba(79, 195, 247, 0.1);
+      border-color: rgba(79, 195, 247, 0.5);
+      color: #4fc3f7;
+    }
+    
+    .delete-btn {
+      color: #ff5722;
+      border-color: rgba(255, 87, 34, 0.3);
+    }
+    
+    .delete-btn:hover {
+      background: rgba(255, 87, 34, 0.1);
+      border-color: rgba(255, 87, 34, 0.5);
+      color: #ff5722;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: #666666;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .control-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
+      color: #b3b3b3;
+      font-family: inherit;
+    }
+    
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+    
+    .refresh-btn:hover {
+      border-color: rgba(79, 195, 247, 0.5);
+      background: rgba(79, 195, 247, 0.1);
+      color: #4fc3f7;
+    }
+    
+    .clear-btn:hover {
+      border-color: rgba(255, 87, 34, 0.5);
+      background: rgba(255, 87, 34, 0.1);
+      color: #ff5722;
+    }
+    
+    .no-video {
+      text-align: center;
+      padding: 32px 24px;
+      color: #666666;
+      font-size: 14px;
+    }
+    
+    /* Playback Speed Controls */
+    .speed-control-section {
+      background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    
+    .speed-control-section h4 {
+      margin: 0 0 16px 0;
+      font-size: 14px;
+      color: #ffffff;
+      font-weight: 600;
+      text-align: center;
+    }
+    
+    .speed-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .speed-btn {
+      background: linear-gradient(135deg, #333333, #404040);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 45px;
+    }
+    
+    .speed-btn:hover {
+      background: linear-gradient(135deg, #404040, #505050);
+      border-color: rgba(255, 23, 68, 0.3);
+    }
+    
+    .speed-btn.active {
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      border-color: rgba(255, 23, 68, 0.5);
+      box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
+    }
+    
+    .speed-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .speed-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #333333, #404040);
+      outline: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .speed-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
+    }
+    
+    .speed-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff1744, #d50000);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
+    }
+    
+    .speed-value {
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      min-width: 45px;
+      text-align: center;
+      background: linear-gradient(135deg, #333333, #404040);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>🎵 Markers Manager</h2>
+  </div>
+  
+  <div class="content">
+    <div id="currentVideo" class="current-video" style="display: none;">
+      <h3>🎵 Current Track</h3>
+      <div class="video-info">
+        <div><strong>Title:</strong> <span id="videoTitle"></span></div>
+        <div><strong>Time:</strong> <span id="currentTime"></span></div>
+      </div>
+      <div class="add-marker-section">
+        <button id="addTimecodeBtn" class="add-btn" style="width: 100%;">➕ Add Quick Marker</button>
+      </div>
+      
+      <!-- Playback Speed Controls -->
+      <div class="speed-control-section">
+        <h4>🎛️ Playback Speed</h4>
+        <div class="speed-controls">
+          <button class="speed-btn" data-speed="0.5">0.5x</button>
+          <button class="speed-btn" data-speed="0.75">0.75x</button>
+          <button class="speed-btn active" data-speed="1">1x</button>
+          <button class="speed-btn" data-speed="1.25">1.25x</button>
+          <button class="speed-btn" data-speed="1.5">1.5x</button>
+          <button class="speed-btn" data-speed="2">2x</button>
+        </div>
+        <div class="speed-slider-container">
+          <input type="range" id="speedSlider" class="speed-slider" min="0.25" max="3" step="0.05" value="1">
+          <span id="speedValue" class="speed-value">1.00x</span>
+        </div>
+      </div>
+      
+    </div>
+    
+    <div id="noVideo" class="no-video">
+      <p>🎵 Go to YouTube Music to start adding markers</p>
+    </div>
+    
+    <div class="markers-section">
+      <div class="markers-header">
+        <h3>Your Markers</h3>
+        <span id="markersCount" class="markers-count">0</span>
+      </div>
+      <div id="markersList" class="markers-list"></div>
+    </div>
+    
+    <div class="controls">
+      <button id="refreshBtn" class="control-btn refresh-btn">🔄 Refresh</button>
+      <button id="clearAllBtn" class="control-btn clear-btn">🗑️ Clear All</button>
+    </div>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
