@@ -404,66 +404,10 @@ function removeMarker(timecode) {
       );
       chrome.storage.local.set({ markers }, () => {
         displayMarkersOnProgressBar();
+        updateMarkerList(); // Update the marker list
       });
     }
   });
-}
-
-function createAddMarkerButton() {
-  // Remove existing button if it exists
-  const existingBtn = document.querySelector('.ytmusic-add-marker-btn');
-  if (existingBtn) {
-    existingBtn.remove();
-  }
-
-  addMarkerBtn = document.createElement('button');
-  addMarkerBtn.className = 'ytmusic-add-marker-btn';
-  addMarkerBtn.innerHTML = '+';
-  addMarkerBtn.title = 'Add quick marker without description (M)';
-  addMarkerBtn.style.cssText = `
-    position: fixed !important;
-    bottom: 20px !important;
-    right: 20px !important;
-    width: 60px !important;
-    height: 60px !important;
-    background: linear-gradient(135deg, #ff1744, #d50000) !important;
-    border: 2px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 50% !important;
-    color: white !important;
-    font-size: 24px !important;
-    font-weight: 700 !important;
-    cursor: pointer !important;
-    z-index: 99999 !important;
-    box-shadow: 0 8px 32px rgba(255, 23, 68, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    backdrop-filter: blur(20px) !important;
-    font-family: 'YouTube Sans', Roboto, Arial, sans-serif !important;
-  `;
-
-  addMarkerBtn.addEventListener('click', addMarkerAtCurrentTime);
-
-  // Add hover effects
-  addMarkerBtn.addEventListener('mouseenter', () => {
-    addMarkerBtn.style.transform = 'scale(1.1)';
-    addMarkerBtn.style.background = 'linear-gradient(135deg, #ff1744, #b71c1c)';
-    addMarkerBtn.style.boxShadow =
-      '0 12px 40px rgba(255, 23, 68, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1)';
-    addMarkerBtn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-  });
-
-  addMarkerBtn.addEventListener('mouseleave', () => {
-    addMarkerBtn.style.transform = 'scale(1)';
-    addMarkerBtn.style.background = 'linear-gradient(135deg, #ff1744, #d50000)';
-    addMarkerBtn.style.boxShadow =
-      '0 8px 32px rgba(255, 23, 68, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)';
-    addMarkerBtn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-  });
-
-  document.body.appendChild(addMarkerBtn);
-  console.log('Add marker button created and added to page');
 }
 
 function handleVideoChange() {
@@ -473,8 +417,9 @@ function handleVideoChange() {
     currentVideoId = newVideoId;
     // Add longer delay for video changes to ensure everything is loaded
     setTimeout(displayMarkersOnProgressBar, 3000);
-    // Ensure button is still there after video change
-    setTimeout(ensureButtonExists, 1000);
+    // Ensure panel is still there after video change
+    setTimeout(ensurePanelExists, 1000);
+    setTimeout(updateMarkerList, 2000);
   }
 }
 
@@ -1054,3 +999,104 @@ function seekToTime(seconds) {
 
 // Initialize the extension
 initializeExtension();
+
+// Playback speed functionality
+function setVideoPlaybackSpeed(speed) {
+  const video = document.querySelector('video');
+  if (video) {
+    video.playbackRate = speed;
+    console.log(`YouTube Music playback speed set to ${speed}x`);
+
+    // Store the speed preference
+    chrome.storage.local.set({ playbackSpeed: speed });
+
+    // Show a temporary notification
+    showSpeedNotification(speed);
+  }
+}
+
+function showSpeedNotification(speed) {
+  // Remove existing notification if any
+  const existingNotification = document.querySelector(
+    '.ytmusic-speed-notification'
+  );
+  if (existingNotification) {
+    existingNotification.remove();
+  }
+
+  // Create notification element
+  const notification = document.createElement('div');
+  notification.className = 'ytmusic-speed-notification';
+  notification.textContent = `Speed: ${speed}x`;
+  notification.style.cssText = `
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: rgba(0, 0, 0, 0.9) !important;
+    color: #ffffff !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    z-index: 10000 !important;
+    border: 1px solid rgba(255, 23, 68, 0.3) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(10px) !important;
+    opacity: 0 !important;
+    transform: translateY(-10px) !important;
+    transition: all 0.3s ease !important;
+    pointer-events: none !important;
+  `;
+
+  document.body.appendChild(notification);
+
+  // Animate in
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateY(0)';
+  }, 10);
+
+  // Animate out and remove
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
+  }, 2000);
+}
+
+// Message listener for popup communication
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'getVideoInfo') {
+    const videoInfo = {
+      videoId: getVideoId(),
+      title: getVideoTitle(),
+      currentTime: getCurrentTime(),
+      duration: getVideoDuration(),
+      url: window.location.href,
+    };
+    sendResponse(videoInfo);
+  } else if (request.action === 'refreshTimecodes') {
+    displayMarkersOnProgressBar();
+    updateMarkerList();
+    sendResponse({ success: true });
+  } else if (request.action === 'setPlaybackSpeed') {
+    setVideoPlaybackSpeed(request.speed);
+    updatePanelSpeedUI(request.speed);
+    sendResponse({ success: true });
+  }
+  return true; // Keep message channel open for async response
+});
+
+// Initialize when page is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeExtension);
+} else {
+  initializeExtension();
+}
+
+// Also initialize after a delay to handle YouTube Music's dynamic loading
+setTimeout(initializeExtension, 3000);
