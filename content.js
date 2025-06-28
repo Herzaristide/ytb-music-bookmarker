@@ -387,6 +387,7 @@ function addMarkerAtCurrentTime() {
 
     chrome.storage.local.set({ markers }, () => {
       displayMarkersOnProgressBar();
+      updateMarkerList(); // Update the marker list
     });
   });
 }
@@ -421,9 +422,8 @@ function createAddMarkerButton() {
   addMarkerBtn.title = 'Add quick marker without description (M)';
   addMarkerBtn.style.cssText = `
     position: fixed !important;
-    top: 20px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    bottom: 20px !important;
+    right: 20px !important;
     width: 60px !important;
     height: 60px !important;
     background: linear-gradient(135deg, #ff1744, #d50000) !important;
@@ -447,7 +447,7 @@ function createAddMarkerButton() {
 
   // Add hover effects
   addMarkerBtn.addEventListener('mouseenter', () => {
-    addMarkerBtn.style.transform = 'translateX(-50%) scale(1.1)';
+    addMarkerBtn.style.transform = 'scale(1.1)';
     addMarkerBtn.style.background = 'linear-gradient(135deg, #ff1744, #b71c1c)';
     addMarkerBtn.style.boxShadow =
       '0 12px 40px rgba(255, 23, 68, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1)';
@@ -455,7 +455,7 @@ function createAddMarkerButton() {
   });
 
   addMarkerBtn.addEventListener('mouseleave', () => {
-    addMarkerBtn.style.transform = 'translateX(-50%) scale(1)';
+    addMarkerBtn.style.transform = 'scale(1)';
     addMarkerBtn.style.background = 'linear-gradient(135deg, #ff1744, #d50000)';
     addMarkerBtn.style.boxShadow =
       '0 8px 32px rgba(255, 23, 68, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)';
@@ -478,168 +478,25 @@ function handleVideoChange() {
   }
 }
 
-let urlChangeTimeout;
-function handleUrlChange() {
-  // Debounce URL changes to prevent excessive calls
-  if (urlChangeTimeout) {
-    clearTimeout(urlChangeTimeout);
-  }
-
-  urlChangeTimeout = setTimeout(() => {
-    const newVideoId = getVideoId();
-    if (newVideoId && newVideoId !== currentVideoId) {
-      handleVideoChange();
-    }
-  }, 1000);
-}
-
-function ensureButtonExists() {
-  const existingBtn = document.querySelector('.ytmusic-add-marker-btn');
-  if (!existingBtn || !document.body.contains(existingBtn)) {
-    console.log('Button missing, recreating...');
-    createAddMarkerButton();
-  }
-}
-
-// Apply stored speed when video loads
-function applyStoredPlaybackSpeed() {
-  chrome.storage.local.get({ playbackSpeed: 1 }, (data) => {
-    const video = document.querySelector('video');
-    if (video && data.playbackSpeed !== 1) {
-      video.playbackRate = data.playbackSpeed;
-      console.log(`Applied stored playback speed: ${data.playbackSpeed}x`);
-    }
-  });
-}
-
-// Create speed control overlay on the web interface
-function createSpeedControlOverlay() {
-  // Remove existing overlay if any
-  const existingOverlay = document.querySelector(
-    '.ytmusic-speed-control-overlay'
+// Ensure panel exists
+function ensurePanelExists() {
+  const existingPanel = document.querySelector(
+    '.ytmusic-unified-control-panel'
   );
-  if (existingOverlay) {
-    existingOverlay.remove();
-  }
-
-  const overlay = document.createElement('div');
-  overlay.className = 'ytmusic-speed-control-overlay';
-  overlay.innerHTML = `
-    <div class="ytmusic-speed-header">
-      <span>🎛️ Speed</span>
-      <button class="ytmusic-speed-toggle">−</button>
-    </div>
-    <div class="ytmusic-speed-controls-web">
-      <button class="ytmusic-speed-btn-web" data-speed="0.5">0.5x</button>
-      <button class="ytmusic-speed-btn-web" data-speed="0.75">0.75x</button>
-      <button class="ytmusic-speed-btn-web active" data-speed="1">1x</button>
-      <button class="ytmusic-speed-btn-web" data-speed="1.25">1.25x</button>
-      <button class="ytmusic-speed-btn-web" data-speed="1.5">1.5x</button>
-      <button class="ytmusic-speed-btn-web" data-speed="2">2x</button>
-    </div>
-    <div class="ytmusic-speed-slider-container-web">
-      <input type="range" class="ytmusic-speed-slider-web" min="0.25" max="3" step="0.05" value="1">
-      <span class="ytmusic-speed-value-web">1.00x</span>
-    </div>
-    <div class="ytmusic-speed-collapsed-icon">🎛️</div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  // Get elements
-  const speedBtns = overlay.querySelectorAll('.ytmusic-speed-btn-web');
-  const speedSlider = overlay.querySelector('.ytmusic-speed-slider-web');
-  const speedValue = overlay.querySelector('.ytmusic-speed-value-web');
-  const toggleBtn = overlay.querySelector('.ytmusic-speed-toggle');
-  const collapsedIcon = overlay.querySelector('.ytmusic-speed-collapsed-icon');
-
-  // Load and apply stored speed
-  chrome.storage.local.get(
-    { playbackSpeed: 1, speedOverlayCollapsed: false },
-    (data) => {
-      const currentSpeed = data.playbackSpeed;
-      speedSlider.value = currentSpeed;
-      speedValue.textContent = `${currentSpeed.toFixed(2)}x`;
-
-      // Update active button
-      speedBtns.forEach((btn) => {
-        btn.classList.toggle(
-          'active',
-          parseFloat(btn.dataset.speed) === currentSpeed
-        );
-      });
-
-      // Apply collapsed state
-      if (data.speedOverlayCollapsed) {
-        overlay.classList.add('collapsed');
-        toggleBtn.textContent = '+';
-      }
-    }
-  );
-
-  // Speed button listeners
-  speedBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const speed = parseFloat(btn.dataset.speed);
-      setVideoPlaybackSpeed(speed);
-
-      // Update UI
-      speedBtns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      speedSlider.value = speed;
-      speedValue.textContent = `${speed.toFixed(2)}x`;
-    });
-  });
-
-  // Speed slider listener
-  speedSlider.addEventListener('input', () => {
-    const speed = parseFloat(speedSlider.value);
-    setVideoPlaybackSpeed(speed);
-    speedValue.textContent = `${speed.toFixed(2)}x`;
-
-    // Update active button if it matches a preset
-    speedBtns.forEach((btn) => {
-      btn.classList.toggle(
-        'active',
-        Math.abs(parseFloat(btn.dataset.speed) - speed) < 0.01
-      );
-    });
-  });
-
-  // Toggle collapse/expand
-  const toggleOverlay = () => {
-    overlay.classList.toggle('collapsed');
-    const isCollapsed = overlay.classList.contains('collapsed');
-    toggleBtn.textContent = isCollapsed ? '+' : '−';
-    chrome.storage.local.set({ speedOverlayCollapsed: isCollapsed });
-  };
-
-  toggleBtn.addEventListener('click', toggleOverlay);
-  collapsedIcon.addEventListener('click', toggleOverlay);
-
-  console.log('Speed control overlay created');
-  return overlay;
-}
-
-// Ensure speed overlay exists
-function ensureSpeedOverlayExists() {
-  const existingOverlay = document.querySelector(
-    '.ytmusic-speed-control-overlay'
-  );
-  if (!existingOverlay || !document.body.contains(existingOverlay)) {
-    console.log('Speed overlay missing, recreating...');
-    createSpeedControlOverlay();
+  if (!existingPanel || !document.body.contains(existingPanel)) {
+    console.log('Control panel missing, recreating...');
+    createUnifiedControlPanel();
   }
 }
 
-// Update web speed overlay UI
-function updateWebSpeedOverlay(speed) {
-  const overlay = document.querySelector('.ytmusic-speed-control-overlay');
-  if (!overlay) return;
+// Update panel speed UI
+function updatePanelSpeedUI(speed) {
+  const panel = document.querySelector('.ytmusic-unified-control-panel');
+  if (!panel) return;
 
-  const speedBtns = overlay.querySelectorAll('.ytmusic-speed-btn-web');
-  const speedSlider = overlay.querySelector('.ytmusic-speed-slider-web');
-  const speedValue = overlay.querySelector('.ytmusic-speed-value-web');
+  const speedBtns = panel.querySelectorAll('.ytmusic-speed-btn');
+  const speedSlider = panel.querySelector('.ytmusic-speed-slider');
+  const speedValue = panel.querySelector('.ytmusic-speed-value');
 
   if (speedSlider) speedSlider.value = speed;
   if (speedValue) speedValue.textContent = `${speed.toFixed(2)}x`;
@@ -652,35 +509,36 @@ function updateWebSpeedOverlay(speed) {
   });
 }
 
+// Handle URL changes
+function handleUrlChange() {
+  console.log('URL changed, reinitializing...');
+  setTimeout(() => {
+    displayMarkersOnProgressBar();
+    updateMarkerList();
+    ensurePanelExists();
+  }, 2000);
+}
+
+// Initialize extension
 function initializeExtension() {
   if (isInitialized) return;
   isInitialized = true;
 
   console.log('Initializing YouTube Music Timecode Markers extension');
 
-  // Create add marker button
-  createAddMarkerButton();
-
-  // Create speed control overlay
-  createSpeedControlOverlay();
+  // Create unified control panel (replaces separate button and speed overlay)
+  createUnifiedControlPanel();
 
   // Apply stored playback speed
   setTimeout(applyStoredPlaybackSpeed, 1000);
 
-  // Ensure button and overlay stay visible - check every 5 seconds
-  setInterval(ensureButtonExists, 5000);
-  setInterval(ensureSpeedOverlayExists, 5000);
+  // Ensure panel stays visible - check every 5 seconds
+  setInterval(ensurePanelExists, 5000);
 
   // Initial display of markers with longer delay
   setTimeout(displayMarkersOnProgressBar, 4000);
 
-  // Create speed control overlay
-  setTimeout(createSpeedControlOverlay, 2000);
-
-  // Ensure speed overlay exists
-  setInterval(ensureSpeedOverlayExists, 5000);
-
-  // Watch for URL changes (more efficient than watching DOM changes)
+  // Watch for URL changes
   let currentUrl = window.location.href;
   const checkUrlChange = () => {
     if (window.location.href !== currentUrl) {
@@ -688,17 +546,15 @@ function initializeExtension() {
       handleUrlChange();
     }
   };
-
-  // Check URL changes every 2 seconds instead of using MutationObserver
   setInterval(checkUrlChange, 2000);
 
-  // Keyboard shortcut: M key to add marker
+  // Keyboard shortcuts
   document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === 'm' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
-      // Only if not typing in an input field
       if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
         e.preventDefault();
         addMarkerAtCurrentTime();
+        setTimeout(updateMarkerList, 100); // Update the marker list after adding
       }
     }
 
@@ -716,18 +572,28 @@ function initializeExtension() {
       if (speedMap[e.key]) {
         e.preventDefault();
         setVideoPlaybackSpeed(speedMap[e.key]);
-        updateWebSpeedOverlay(speedMap[e.key]);
+        updatePanelSpeedUI(speedMap[e.key]);
       }
     }
 
-    // Toggle speed overlay with Ctrl+Shift+S
-    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's') {
+    // Navigation shortcuts
+    if (e.ctrlKey && e.key === 'ArrowLeft') {
       e.preventDefault();
-      const overlay = document.querySelector('.ytmusic-speed-control-overlay');
-      if (overlay) {
-        const toggleBtn = overlay.querySelector('.ytmusic-speed-toggle');
-        const collapsedIcon = overlay.querySelector(
-          '.ytmusic-speed-collapsed-icon'
+      goToPreviousMarker();
+    }
+    if (e.ctrlKey && e.key === 'ArrowRight') {
+      e.preventDefault();
+      goToNextMarker();
+    }
+
+    // Toggle panel with Ctrl+Shift+P
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'p') {
+      e.preventDefault();
+      const panel = document.querySelector('.ytmusic-unified-control-panel');
+      if (panel) {
+        const toggleBtn = panel.querySelector('.ytmusic-panel-toggle');
+        const collapsedIcon = panel.querySelector(
+          '.ytmusic-panel-collapsed-icon'
         );
         if (toggleBtn) {
           toggleBtn.click();
@@ -738,139 +604,453 @@ function initializeExtension() {
     }
   });
 
-  // Listen for video events to refresh markers when needed
+  // Video event listeners
   const video = document.querySelector('video');
   if (video) {
     video.addEventListener('loadedmetadata', () => {
-      console.log('Video metadata loaded, refreshing markers');
       setTimeout(displayMarkersOnProgressBar, 1000);
       setTimeout(applyStoredPlaybackSpeed, 500);
-    });
-
-    video.addEventListener('durationchange', () => {
-      console.log('Video duration changed, refreshing markers');
-      setTimeout(displayMarkersOnProgressBar, 1000);
-    });
-
-    video.addEventListener('loadstart', () => {
-      console.log('Video load started, applying stored speed');
-      setTimeout(applyStoredPlaybackSpeed, 200);
+      setTimeout(updateMarkerList, 1500); // Update marker list when video loads
     });
   }
+}
 
-  // Fallback: check for video element periodically
-  const checkForVideo = () => {
+// Apply stored speed when video loads
+function applyStoredPlaybackSpeed() {
+  chrome.storage.local.get({ playbackSpeed: 1 }, (data) => {
     const video = document.querySelector('video');
-    if (video && !video.hasAttribute('data-markers-initialized')) {
-      video.setAttribute('data-markers-initialized', 'true');
-      video.addEventListener('loadedmetadata', () => {
-        setTimeout(displayMarkersOnProgressBar, 1000);
-        setTimeout(applyStoredPlaybackSpeed, 500);
-      });
-      video.addEventListener('loadstart', () => {
-        setTimeout(applyStoredPlaybackSpeed, 200);
-      });
+    if (video && data.playbackSpeed !== 1) {
+      video.playbackRate = data.playbackSpeed;
+      console.log(`Applied stored playback speed: ${data.playbackSpeed}x`);
     }
-  };
-
-  setInterval(checkForVideo, 5000);
+  });
 }
 
-// Message listener for popup communication
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'getVideoInfo') {
-    const videoInfo = {
-      videoId: getVideoId(),
-      title: getVideoTitle(),
-      currentTime: getCurrentTime(),
-      duration: getVideoDuration(),
-      url: window.location.href,
-    };
-    sendResponse(videoInfo);
-  } else if (request.action === 'refreshTimecodes') {
-    displayMarkersOnProgressBar();
-    sendResponse({ success: true });
-  } else if (request.action === 'setPlaybackSpeed') {
-    setVideoPlaybackSpeed(request.speed);
-    sendResponse({ success: true });
-  }
-  return true; // Keep message channel open for async response
-});
-
-// Playback speed functionality
-function setVideoPlaybackSpeed(speed) {
-  const video = document.querySelector('video');
-  if (video) {
-    video.playbackRate = speed;
-    console.log(`YouTube Music playback speed set to ${speed}x`);
-
-    // Store the speed preference
-    chrome.storage.local.set({ playbackSpeed: speed });
-
-    // Show a temporary notification
-    showSpeedNotification(speed);
-  }
-}
-
-function showSpeedNotification(speed) {
-  // Remove existing notification if any
-  const existingNotification = document.querySelector(
-    '.ytmusic-speed-notification'
+// Create unified control panel with speed control, marker creation, and navigation
+function createUnifiedControlPanel() {
+  // Remove existing overlays if any
+  const existingOverlay = document.querySelector(
+    '.ytmusic-speed-control-overlay'
   );
-  if (existingNotification) {
-    existingNotification.remove();
+  if (existingOverlay) {
+    existingOverlay.remove();
+  }
+  const existingBtn = document.querySelector('.ytmusic-add-marker-btn');
+  if (existingBtn) {
+    existingBtn.remove();
   }
 
-  // Create notification element
-  const notification = document.createElement('div');
-  notification.className = 'ytmusic-speed-notification';
-  notification.textContent = `Speed: ${speed}x`;
-  notification.style.cssText = `
-    position: fixed !important;
-    top: 20px !important;
-    right: 20px !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    color: #ffffff !important;
-    padding: 12px 20px !important;
-    border-radius: 8px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    z-index: 10000 !important;
-    border: 1px solid rgba(255, 23, 68, 0.3) !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
-    backdrop-filter: blur(10px) !important;
-    opacity: 0 !important;
-    transform: translateY(-10px) !important;
-    transition: all 0.3s ease !important;
-    pointer-events: none !important;
+  const panel = document.createElement('div');
+  panel.className = 'ytmusic-unified-control-panel';
+  panel.innerHTML = `
+    <div class="ytmusic-panel-header">
+      <span>🎛️ YouTube Music Controls</span>
+      <button class="ytmusic-panel-toggle">−</button>
+    </div>
+    
+    <div class="ytmusic-panel-content">
+      <!-- Speed Control Section -->
+      <div class="ytmusic-section">
+        <div class="ytmusic-section-title">⚡ Speed Control</div>
+        <div class="ytmusic-speed-controls">
+          <button class="ytmusic-speed-btn" data-speed="0.5">0.5x</button>
+          <button class="ytmusic-speed-btn" data-speed="0.75">0.75x</button>
+          <button class="ytmusic-speed-btn active" data-speed="1">1x</button>
+          <button class="ytmusic-speed-btn" data-speed="1.25">1.25x</button>
+          <button class="ytmusic-speed-btn" data-speed="1.5">1.5x</button>
+          <button class="ytmusic-speed-btn" data-speed="2">2x</button>
+        </div>
+        <div class="ytmusic-speed-slider-container">
+          <input type="range" class="ytmusic-speed-slider" min="0.25" max="3" step="0.05" value="1">
+          <span class="ytmusic-speed-value">1.00x</span>
+        </div>
+      </div>
+
+      <!-- Marker Control Section -->
+      <div class="ytmusic-section">
+        <div class="ytmusic-section-title">🎵 Markers</div>
+        <div class="ytmusic-marker-controls">
+          <button class="ytmusic-add-marker-btn-panel">+ Add Marker</button>
+          <button class="ytmusic-clear-markers-btn">🗑️ Clear All</button>
+          <button class="ytmusic-refresh-markers-btn">🔄 Refresh</button>
+        </div>
+        <div class="ytmusic-current-time">
+          <span class="ytmusic-time-display">0:00</span>
+        </div>
+      </div>
+
+      <!-- Marker Navigation Section -->
+      <div class="ytmusic-section">
+        <div class="ytmusic-section-title">📍 Navigation</div>
+        <div class="ytmusic-marker-list">
+          <div class="ytmusic-no-markers">No markers for this video</div>
+        </div>
+        <div class="ytmusic-navigation-controls">
+          <button class="ytmusic-prev-marker-btn">⏮️ Previous</button>
+          <button class="ytmusic-next-marker-btn">⏭️ Next</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="ytmusic-panel-collapsed-icon">🎛️</div>
   `;
 
-  document.body.appendChild(notification);
+  document.body.appendChild(panel);
 
-  // Animate in
-  setTimeout(() => {
-    notification.style.opacity = '1';
-    notification.style.transform = 'translateY(0)';
-  }, 10);
+  // Get elements
+  const speedBtns = panel.querySelectorAll('.ytmusic-speed-btn');
+  const speedSlider = panel.querySelector('.ytmusic-speed-slider');
+  const speedValue = panel.querySelector('.ytmusic-speed-value');
+  const toggleBtn = panel.querySelector('.ytmusic-panel-toggle');
+  const collapsedIcon = panel.querySelector('.ytmusic-panel-collapsed-icon');
+  const addMarkerBtn = panel.querySelector('.ytmusic-add-marker-btn-panel');
+  const clearMarkersBtn = panel.querySelector('.ytmusic-clear-markers-btn');
+  const refreshMarkersBtn = panel.querySelector('.ytmusic-refresh-markers-btn');
+  const timeDisplay = panel.querySelector('.ytmusic-time-display');
+  const markerList = panel.querySelector('.ytmusic-marker-list');
+  const prevMarkerBtn = panel.querySelector('.ytmusic-prev-marker-btn');
+  const nextMarkerBtn = panel.querySelector('.ytmusic-next-marker-btn');
 
-  // Animate out and remove
-  setTimeout(() => {
-    notification.style.opacity = '0';
-    notification.style.transform = 'translateY(-10px)';
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
+  // Load and apply stored settings
+  chrome.storage.local.get(
+    {
+      playbackSpeed: 1,
+      panelCollapsed: false,
+      panelPosition: { left: 20, bottom: 20 },
+    },
+    (data) => {
+      const currentSpeed = data.playbackSpeed;
+      speedSlider.value = currentSpeed;
+      speedValue.textContent = `${currentSpeed.toFixed(2)}x`;
+
+      // Update active speed button
+      speedBtns.forEach((btn) => {
+        btn.classList.toggle(
+          'active',
+          parseFloat(btn.dataset.speed) === currentSpeed
+        );
+      });
+
+      // Apply collapsed state
+      if (data.panelCollapsed) {
+        panel.classList.add('collapsed');
+        toggleBtn.textContent = '+';
       }
-    }, 300);
-  }, 2000);
+
+      // Apply saved position
+      const position = data.panelPosition;
+      panel.style.setProperty('left', `${position.left}px`, 'important');
+      panel.style.setProperty('bottom', `${position.bottom}px`, 'important');
+    }
+  );
+
+  // Speed control listeners
+  speedBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const speed = parseFloat(btn.dataset.speed);
+      setVideoPlaybackSpeed(speed);
+
+      speedBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      speedSlider.value = speed;
+      speedValue.textContent = `${speed.toFixed(2)}x`;
+    });
+  });
+
+  speedSlider.addEventListener('input', () => {
+    const speed = parseFloat(speedSlider.value);
+    setVideoPlaybackSpeed(speed);
+    speedValue.textContent = `${speed.toFixed(2)}x`;
+
+    speedBtns.forEach((btn) => {
+      btn.classList.toggle(
+        'active',
+        Math.abs(parseFloat(btn.dataset.speed) - speed) < 0.01
+      );
+    });
+  });
+
+  // Marker control listeners
+  addMarkerBtn.addEventListener('click', addMarkerAtCurrentTime);
+  clearMarkersBtn.addEventListener('click', clearAllMarkers);
+  refreshMarkersBtn.addEventListener('click', () => {
+    displayMarkersOnProgressBar();
+    updateMarkerList();
+  });
+
+  // Navigation listeners
+  prevMarkerBtn.addEventListener('click', goToPreviousMarker);
+  nextMarkerBtn.addEventListener('click', goToNextMarker);
+
+  // Toggle collapse/expand
+  const togglePanel = () => {
+    panel.classList.toggle('collapsed');
+    const isCollapsed = panel.classList.contains('collapsed');
+    toggleBtn.textContent = isCollapsed ? '+' : '−';
+    chrome.storage.local.set({ panelCollapsed: isCollapsed });
+  };
+
+  toggleBtn.addEventListener('click', togglePanel);
+  collapsedIcon.addEventListener('click', togglePanel);
+
+  // Make draggable
+  makePanelDraggable(panel);
+
+  // Update time display periodically
+  setInterval(updateTimeDisplay, 1000);
+
+  // Initial marker list update
+  updateMarkerList();
+
+  console.log('Unified control panel created');
+  return panel;
 }
 
-// Initialize when page is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeExtension);
-} else {
-  initializeExtension();
+// Make panel draggable
+function makePanelDraggable(element) {
+  let isDragging = false;
+  let startX, startY, startLeft, startTop;
+
+  const header = element.querySelector('.ytmusic-panel-header');
+  const collapsedIcon = element.querySelector('.ytmusic-panel-collapsed-icon');
+
+  function startDrag(e) {
+    if (
+      e.target.closest('.ytmusic-panel-toggle') ||
+      e.target.closest('.ytmusic-speed-btn') ||
+      e.target.closest('.ytmusic-speed-slider') ||
+      e.target.closest('button')
+    ) {
+      return;
+    }
+
+    isDragging = true;
+    element.classList.add('dragging');
+
+    startX = e.clientX || (e.touches && e.touches[0].clientX);
+    startY = e.clientY || (e.touches && e.touches[0].clientY);
+
+    const rect = element.getBoundingClientRect();
+    startLeft = rect.left;
+    startTop = rect.top;
+
+    element.style.setProperty('position', 'fixed', 'important');
+    element.style.setProperty('top', `${startTop}px`, 'important');
+    element.style.setProperty('left', `${startLeft}px`, 'important');
+    element.style.removeProperty('bottom');
+
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function drag(e) {
+    if (!isDragging) return;
+
+    const currentX = e.clientX || (e.touches && e.touches[0].clientX);
+    const currentY = e.clientY || (e.touches && e.touches[0].clientY);
+
+    if (!currentX || !currentY) return;
+
+    const deltaX = currentX - startX;
+    const deltaY = currentY - startY;
+
+    let newLeft = startLeft + deltaX;
+    let newTop = startTop + deltaY;
+
+    const padding = 10;
+    const rect = element.getBoundingClientRect();
+    const maxLeft = window.innerWidth - rect.width - padding;
+    const maxTop = window.innerHeight - rect.height - padding;
+
+    newLeft = Math.max(padding, Math.min(newLeft, maxLeft));
+    newTop = Math.max(padding, Math.min(newTop, maxTop));
+
+    element.style.setProperty('left', `${newLeft}px`, 'important');
+    element.style.setProperty('top', `${newTop}px`, 'important');
+
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function stopDrag() {
+    if (!isDragging) return;
+
+    isDragging = false;
+    element.classList.remove('dragging');
+
+    const rect = element.getBoundingClientRect();
+    const finalLeft = rect.left;
+    const finalBottom = window.innerHeight - rect.bottom;
+
+    element.style.setProperty('bottom', `${finalBottom}px`, 'important');
+    element.style.setProperty('left', `${finalLeft}px`, 'important');
+    element.style.removeProperty('top');
+
+    chrome.storage.local.set({
+      panelPosition: { left: finalLeft, bottom: finalBottom },
+    });
+  }
+
+  if (header) {
+    header.addEventListener('mousedown', startDrag, { passive: false });
+    header.addEventListener('touchstart', startDrag, { passive: false });
+  }
+  if (collapsedIcon) {
+    collapsedIcon.addEventListener('mousedown', startDrag, { passive: false });
+    collapsedIcon.addEventListener('touchstart', startDrag, { passive: false });
+  }
+
+  document.addEventListener('mousemove', drag, { passive: false });
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('touchmove', drag, { passive: false });
+  document.addEventListener('touchend', stopDrag);
 }
 
-// Also initialize after a delay to handle YouTube Music's dynamic loading
-setTimeout(initializeExtension, 3000);
+// Update time display
+function updateTimeDisplay() {
+  const timeDisplay = document.querySelector('.ytmusic-time-display');
+  if (timeDisplay) {
+    const currentTime = getCurrentTime();
+    timeDisplay.textContent = formatTime(currentTime);
+  }
+}
+
+// Update marker list in the panel
+function updateMarkerList() {
+  const videoId = getVideoId();
+  const markerList = document.querySelector('.ytmusic-marker-list');
+
+  if (!markerList || !videoId) return;
+
+  chrome.storage.local.get({ markers: {} }, (data) => {
+    const videoMarkers = data.markers[videoId] || [];
+
+    if (videoMarkers.length === 0) {
+      markerList.innerHTML =
+        '<div class="ytmusic-no-markers">No markers for this video</div>';
+      return;
+    }
+
+    markerList.innerHTML = videoMarkers
+      .map(
+        (marker, index) => `
+      <div class="ytmusic-marker-item" data-timecode="${marker.timecode}">
+        <div class="ytmusic-marker-time">${formatTime(marker.timecode)}</div>
+        <div class="ytmusic-marker-note">${
+          marker.note || 'No description'
+        }</div>
+        <div class="ytmusic-marker-actions">
+          <button class="ytmusic-goto-marker" data-timecode="${
+            marker.timecode
+          }">▶️</button>
+          <button class="ytmusic-delete-marker" data-timecode="${
+            marker.timecode
+          }">🗑️</button>
+        </div>
+      </div>
+    `
+      )
+      .join('');
+
+    // Add event listeners for marker actions
+    markerList.querySelectorAll('.ytmusic-goto-marker').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const timecode = parseInt(e.target.dataset.timecode);
+        seekToTime(timecode);
+      });
+    });
+
+    markerList.querySelectorAll('.ytmusic-delete-marker').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const timecode = parseInt(e.target.dataset.timecode);
+        if (confirm(`Remove marker at ${formatTime(timecode)}?`)) {
+          removeMarker(timecode);
+          updateMarkerList();
+        }
+      });
+    });
+  });
+}
+
+// Clear all markers for current video
+function clearAllMarkers() {
+  const videoId = getVideoId();
+  if (!videoId) return;
+
+  if (confirm('Clear all markers for this video? This cannot be undone.')) {
+    chrome.storage.local.get({ markers: {} }, (data) => {
+      const markers = data.markers;
+      delete markers[videoId];
+      chrome.storage.local.set({ markers }, () => {
+        displayMarkersOnProgressBar();
+        updateMarkerList();
+      });
+    });
+  }
+}
+
+// Navigate to previous marker
+function goToPreviousMarker() {
+  const videoId = getVideoId();
+  const currentTime = getCurrentTime();
+
+  if (!videoId) return;
+
+  chrome.storage.local.get({ markers: {} }, (data) => {
+    const videoMarkers = data.markers[videoId] || [];
+    const sortedMarkers = videoMarkers.sort((a, b) => a.timecode - b.timecode);
+
+    // Find the last marker before current time
+    let targetMarker = null;
+    for (let i = sortedMarkers.length - 1; i >= 0; i--) {
+      if (sortedMarkers[i].timecode < currentTime - 1) {
+        targetMarker = sortedMarkers[i];
+        break;
+      }
+    }
+
+    if (targetMarker) {
+      seekToTime(targetMarker.timecode);
+    } else if (sortedMarkers.length > 0) {
+      // Go to last marker if no previous marker found
+      seekToTime(sortedMarkers[sortedMarkers.length - 1].timecode);
+    }
+  });
+}
+
+// Navigate to next marker
+function goToNextMarker() {
+  const videoId = getVideoId();
+  const currentTime = getCurrentTime();
+
+  if (!videoId) return;
+
+  chrome.storage.local.get({ markers: {} }, (data) => {
+    const videoMarkers = data.markers[videoId] || [];
+    const sortedMarkers = videoMarkers.sort((a, b) => a.timecode - b.timecode);
+
+    // Find the first marker after current time
+    const targetMarker = sortedMarkers.find(
+      (marker) => marker.timecode > currentTime + 1
+    );
+
+    if (targetMarker) {
+      seekToTime(targetMarker.timecode);
+    } else if (sortedMarkers.length > 0) {
+      // Go to first marker if no next marker found
+      seekToTime(sortedMarkers[0].timecode);
+    }
+  });
+}
+
+// Seek to specific time
+function seekToTime(seconds) {
+  const video = document.querySelector('video');
+  if (video) {
+    video.currentTime = seconds;
+    console.log(`Seeking to ${formatTime(seconds)}`);
+  }
+}
+
+// Initialize the extension
+initializeExtension();
