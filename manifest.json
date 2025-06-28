@@ -1,26 +1,38 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Music Timecode Markers",
-  "version": "3.0",
-  "description": "Add visual timecode indicators to YouTube Music progress bar and control playback speed.",
-  "permissions": ["storage", "activeTab"],
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": "icon.png"
-  },
+  "name": "YouTube Music Bookmarker",
+  "version": "2.0.0",
+  "description": "Advanced bookmarking and speed control for YouTube Music",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://music.youtube.com/*"
+  ],
   "content_scripts": [
     {
-      "matches": ["*://music.youtube.com/*"],
-      "js": [
-        "scripts/utils.js",
-        "scripts/storage.js",
-        "scripts/markers.js",
-        "scripts/speed-controls.js",
-        "scripts/navigation.js",
-        "scripts/ui-panel.js",
-        "scripts/content-main.js"
-      ],
-      "css": ["styles.css"]
+      "matches": ["https://music.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_end"
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "YouTube Music Controls",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
 }
