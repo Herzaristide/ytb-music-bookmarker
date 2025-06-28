@@ -96,7 +96,7 @@ class MarkerManager {
     if (note && note.trim()) {
       tooltip.textContent = `${timeStr} - ${note}`;
     } else {
-      tooltip.textContent = `Click to go to ${timeStr}`;
+      tooltip.textContent = `${timeStr} - Click to seek, Right-click to edit`;
     }
     marker.appendChild(tooltip);
 
@@ -154,6 +154,13 @@ class MarkerManager {
       if (confirm(`Remove marker at ${timeStr}?`)) {
         this.removeMarker(timecode);
       }
+    });
+
+    // Right-click to edit description
+    marker.addEventListener('contextmenu', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.editMarkerDescription(timecode);
     });
   }
 
@@ -250,9 +257,10 @@ class MarkerManager {
       return;
     }
 
+    // Create marker immediately without asking for description
     const marker = {
       timecode: Math.floor(currentTime),
-      note: '',
+      note: '', // Empty description by default
       timestamp: new Date().toISOString(),
       title: title,
     };
@@ -267,6 +275,148 @@ class MarkerManager {
       }
     } catch (error) {
       console.error('Error adding marker:', error);
+    }
+  }
+
+  createMarkerDescriptionModal(title, currentValue = '', callback) {
+    // Remove existing modal if any
+    const existingModal = document.querySelector('.ytmusic-marker-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'ytmusic-marker-modal-overlay';
+    modalOverlay.style.cssText = `
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: rgba(0, 0, 0, 0.7) !important;
+      z-index: 10000 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      backdrop-filter: blur(5px) !important;
+      -webkit-backdrop-filter: blur(5px) !important;
+    `;
+
+    // Create modal
+    const modal = document.createElement('div');
+    modal.className = 'ytmusic-marker-modal';
+    modal.style.cssText = `
+      background: #1f1f1f !important;
+      border-radius: 12px !important;
+      padding: 24px !important;
+      min-width: 400px !important;
+      max-width: 500px !important;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      font-family: 'YouTube Sans', Roboto, Arial, sans-serif !important;
+    `;
+
+    modal.innerHTML = `
+      <div style="color: #fff; font-size: 18px; font-weight: 600; margin-bottom: 16px;">${title}</div>
+      <input type="text" class="ytmusic-marker-input" value="${currentValue}" 
+             placeholder="Enter marker description (optional)" 
+             style="width: 100%; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; background: #2a2a2a; color: #fff; font-size: 14px; outline: none; font-family: inherit;" />
+      <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+        <button class="ytmusic-modal-cancel" style="padding: 10px 20px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px; background: transparent; color: #fff; cursor: pointer; font-size: 14px; font-family: inherit;">Cancel</button>
+        <button class="ytmusic-modal-confirm" style="padding: 10px 20px; border: none; border-radius: 6px; background: #ff1744; color: #fff; cursor: pointer; font-size: 14px; font-weight: 500; font-family: inherit;">Save</button>
+      </div>
+    `;
+
+    modalOverlay.appendChild(modal);
+    document.body.appendChild(modalOverlay);
+
+    const input = modal.querySelector('.ytmusic-marker-input');
+    const cancelBtn = modal.querySelector('.ytmusic-modal-cancel');
+    const confirmBtn = modal.querySelector('.ytmusic-modal-confirm');
+
+    // Focus and select input
+    setTimeout(() => {
+      input.focus();
+      input.select();
+    }, 100);
+
+    // Handle actions
+    const closeModal = () => {
+      modalOverlay.remove();
+    };
+
+    const confirmAction = () => {
+      const value = input.value.trim();
+      closeModal();
+      callback(value);
+    };
+
+    const cancelAction = () => {
+      closeModal();
+      callback(null);
+    };
+
+    // Event listeners
+    confirmBtn.addEventListener('click', confirmAction);
+    cancelBtn.addEventListener('click', cancelAction);
+
+    // Enter to confirm, Escape to cancel
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        confirmAction();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelAction();
+      }
+    });
+
+    // Click overlay to cancel
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        cancelAction();
+      }
+    });
+  }
+
+  async editMarkerDescription(timecode) {
+    const videoId = getVideoId();
+    if (!videoId) return;
+
+    try {
+      const videoMarkers = await StorageManager.getVideoMarkers(videoId);
+      const marker = videoMarkers.find((m) => m.timecode === timecode);
+
+      if (!marker) {
+        alert('Marker not found');
+        return;
+      }
+
+      const currentDescription = marker.note || '';
+
+      // Use custom modal for editing
+      this.createMarkerDescriptionModal(
+        'Edit Marker Description',
+        currentDescription,
+        async (newDescription) => {
+          if (newDescription === null) return; // Canceled
+
+          // Update the marker
+          marker.note = newDescription;
+
+          // Save the updated marker
+          await StorageManager.updateMarker(videoId, marker);
+
+          // Refresh displays
+          await this.displayMarkersOnProgressBar();
+          if (window.uiPanel) {
+            window.uiPanel.updateMarkerList();
+          }
+        }
+      );
+    } catch (error) {
+      console.error('Error editing marker description:', error);
     }
   }
 

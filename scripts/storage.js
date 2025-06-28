@@ -98,4 +98,20 @@ class StorageManager {
       chrome.storage.local.set(settings, resolve);
     });
   }
+
+  static async updateMarker(videoId, updatedMarker) {
+    const allMarkers = await this.getMarkers();
+    if (allMarkers[videoId]) {
+      const markerIndex = allMarkers[videoId].findIndex(
+        (m) => m.timecode === updatedMarker.timecode
+      );
+
+      if (markerIndex >= 0) {
+        allMarkers[videoId][markerIndex] = updatedMarker;
+        await this.saveMarkers(allMarkers);
+        return true;
+      }
+    }
+    return false;
+  }
 }

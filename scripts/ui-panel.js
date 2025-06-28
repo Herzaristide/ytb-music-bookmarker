@@ -234,10 +234,13 @@ class UIPanel {
           <div class="ytmusic-marker-actions">
             <button class="ytmusic-goto-marker" data-timecode="${
               marker.timecode
-            }">▶️</button>
+            }" title="Go to marker">▶️</button>
+            <button class="ytmusic-edit-marker" data-timecode="${
+              marker.timecode
+            }" title="Edit description">✏️</button>
             <button class="ytmusic-delete-marker" data-timecode="${
               marker.timecode
-            }">🗑️</button>
+            }" title="Delete marker">🗑️</button>
           </div>
         </div>
       `
@@ -249,6 +252,13 @@ class UIPanel {
         btn.addEventListener('click', (e) => {
           const timecode = parseInt(e.target.dataset.timecode);
           seekToTime(timecode);
+        });
+      });
+
+      markerList.querySelectorAll('.ytmusic-edit-marker').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const timecode = parseInt(e.target.dataset.timecode);
+          this.markerManager.editMarkerDescription(timecode);
         });
       });
 

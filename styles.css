@@ -327,6 +327,7 @@
 }
 
 .ytmusic-goto-marker,
+.ytmusic-edit-marker,
 .ytmusic-delete-marker {
   background: none !important;
   border: none !important;
@@ -339,6 +340,10 @@
 
 .ytmusic-goto-marker:hover {
   background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.ytmusic-edit-marker:hover {
+  background: rgba(255, 193, 7, 0.2) !important;
 }
 
 .ytmusic-delete-marker:hover {
