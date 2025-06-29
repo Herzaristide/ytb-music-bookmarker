@@ -3,7 +3,7 @@ import { useMarkers } from '../hooks/useMarkers';
 import { useCurrentTime } from '../hooks/useCurrentTime';
 import { Plus, Trash2, RefreshCw, CheckCircle } from 'lucide-react';
 
-const MarkerControls = () => {
+const MarkerControls = ({ onMarkersChange }) => {
   const { addMarker, clearAllMarkers, loadMarkers, markers } = useMarkers();
   const { formattedTime } = useCurrentTime();
   const [loading, setLoading] = useState(false);
@@ -25,6 +25,11 @@ const MarkerControls = () => {
       // Show success feedback
       setJustAdded(true);
       setTimeout(() => setJustAdded(false), 2000);
+
+      // Notify parent component
+      if (onMarkersChange) {
+        onMarkersChange();
+      }
     } catch (error) {
       console.error('MarkerControls: Error adding marker:', error);
       alert(error.message);
@@ -38,6 +43,11 @@ const MarkerControls = () => {
       setLoading(true);
       try {
         await clearAllMarkers();
+
+        // Notify parent component
+        if (onMarkersChange) {
+          onMarkersChange();
+        }
       } catch (error) {
         console.error('Error clearing markers:', error);
       } finally {

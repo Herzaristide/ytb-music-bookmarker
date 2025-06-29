@@ -108,10 +108,10 @@ export const useMarkers = () => {
           markerContainer.className = 'ytmusic-marker-overlay';
           markerContainer.style.cssText = `
             position: absolute;
-            top: 0;
+            top: -40px;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 40px;
             pointer-events: none;
             z-index: 1000;
           `;
@@ -140,28 +140,79 @@ export const useMarkers = () => {
           markerElement.style.cssText = `
             position: absolute;
             left: ${percentage}%;
-            top: 0;
-            width: 3px;
-            height: 100%;
-            background: linear-gradient(to bottom, #ff6b6b, #ff4757);
-            border-radius: 1px;
+            top: 20px;
+            width: 6px;
+            height: 20px;
+            background: linear-gradient(180deg, #ff4757 0%, #ff3742 50%, #ff1e2d 100%);
+            border-radius: 3px 3px 0 0;
             z-index: 1001;
             cursor: pointer;
             transform: translateX(-50%);
-            box-shadow: 0 0 3px rgba(255, 75, 87, 0.5);
+            box-shadow: 0 3px 12px rgba(255, 71, 87, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2);
             pointer-events: auto;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
           `;
+
+          // Create description tooltip
+          const description = document.createElement('div');
+          description.className = 'ytmusic-marker-description';
+          description.textContent =
+            m.note ||
+            `${Math.floor(m.timecode / 60)}:${String(m.timecode % 60).padStart(
+              2,
+              '0'
+            )}`;
+          
+          // Check if marker has a description to determine initial visibility
+          const hasDescription = m.note && m.note.trim() !== '';
+          
+          description.style.cssText = `
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: ${hasDescription ? '1' : '0'};
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1002;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+          `;
+
+          markerElement.appendChild(description);
 
           // Add hover effect
           markerElement.addEventListener('mouseenter', () => {
-            markerElement.style.width = '4px';
-            markerElement.style.boxShadow = '0 0 6px rgba(255, 75, 87, 0.8)';
+            markerElement.style.width = '8px';
+            markerElement.style.height = '24px';
+            markerElement.style.top = '16px';
+            markerElement.style.boxShadow =
+              '0 5px 20px rgba(255, 71, 87, 0.7), 0 0 0 2px rgba(255, 255, 255, 0.4)';
+            markerElement.style.background =
+              'linear-gradient(180deg, #ff6b6b 0%, #ff4757 50%, #ff3742 100%)';
+            description.style.opacity = '1';
           });
 
           markerElement.addEventListener('mouseleave', () => {
-            markerElement.style.width = '3px';
-            markerElement.style.boxShadow = '0 0 3px rgba(255, 75, 87, 0.5)';
+            markerElement.style.width = '6px';
+            markerElement.style.height = '20px';
+            markerElement.style.top = '20px';
+            markerElement.style.boxShadow =
+              '0 3px 12px rgba(255, 71, 87, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2)';
+            markerElement.style.background =
+              'linear-gradient(180deg, #ff4757 0%, #ff3742 50%, #ff1e2d 100%)';
+            // Only hide description on mouse leave if marker doesn't have a description
+            description.style.opacity = hasDescription ? '1' : '0';
           });
 
           // Add click handler

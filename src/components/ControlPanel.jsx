@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StorageManager } from '../utils/storage';
 import ToggleButton from './ToggleButton';
-import SpeedControls from './SpeedControls';
 import MarkerControls from './MarkerControls';
 import MarkerList from './MarkerList';
 import ProgressBarMarkers from './ProgressBarMarkers';
@@ -9,6 +8,7 @@ import CustomPlayerBar from './CustomPlayerBar';
 
 const ControlPanel = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [markersKey, setMarkersKey] = useState(0); // Force re-render of markers
 
   useEffect(() => {
     // Load panel visibility state
@@ -35,6 +35,11 @@ const ControlPanel = () => {
     }
   };
 
+  const handleMarkersChange = () => {
+    // Force re-render of markers when they change
+    setMarkersKey((prev) => prev + 1);
+  };
+
   return (
     <>
       <ToggleButton isVisible={isVisible} onClick={togglePanel} />
@@ -44,12 +49,11 @@ const ControlPanel = () => {
           isVisible ? 'visible' : ''
         }`}
       >
-        <SpeedControls />
-        <MarkerControls />
-        <MarkerList />
+        <MarkerControls onMarkersChange={handleMarkersChange} />
+        <MarkerList onMarkersChange={handleMarkersChange} />
       </div>
 
-      <ProgressBarMarkers />
+      <ProgressBarMarkers key={markersKey} />
       <CustomPlayerBar />
     </>
   );

@@ -4,7 +4,7 @@ import { seekToTime, formatTime } from '../utils/youtube';
 import { Play, Edit, Trash2, SkipBack, SkipForward } from 'lucide-react';
 import { useCurrentTime } from '../hooks/useCurrentTime';
 
-const MarkerList = () => {
+const MarkerList = ({ onMarkersChange }) => {
   const {
     markers,
     updateMarker,
@@ -30,6 +30,11 @@ const MarkerList = () => {
       await updateMarker(editingMarker, { note: editDescription });
       setEditingMarker(null);
       setEditDescription('');
+
+      // Notify parent component
+      if (onMarkersChange) {
+        onMarkersChange();
+      }
     } catch (error) {
       console.error('Error updating marker:', error);
     }
@@ -44,6 +49,11 @@ const MarkerList = () => {
     if (confirm(`Remove marker at ${formatTime(timecode)}?`)) {
       try {
         await removeMarker(timecode);
+
+        // Notify parent component
+        if (onMarkersChange) {
+          onMarkersChange();
+        }
       } catch (error) {
         console.error('Error removing marker:', error);
       }

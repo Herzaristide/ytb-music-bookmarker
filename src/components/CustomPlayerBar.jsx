@@ -39,7 +39,7 @@ const CustomPlayerBar = () => {
     }
   };
   const injectCustomPlayerBar = useCallback(() => {
-    // Find the native player bar to position our custom bar above it
+    // Find the native player bar container
     const playerBar =
       document.querySelector('ytmusic-player-bar') ||
       document.querySelector('.ytmusic-player-bar') ||
@@ -50,6 +50,18 @@ const CustomPlayerBar = () => {
       return false;
     }
 
+    // Look for the right side controls container within the player bar
+    const rightControls = 
+      playerBar.querySelector('.right-controls') ||
+      playerBar.querySelector('.ytmusic-player-bar-right-controls') ||
+      playerBar.querySelector('[slot="right-controls"]') ||
+      playerBar.querySelector('.player-bar-right');
+
+    if (!rightControls) {
+      console.log('Right controls container not found, retrying...');
+      return false;
+    }
+
     // Check if our custom player bar is already injected
     const existing = document.querySelector('.ytmusic-custom-player-bar');
     if (existing) {
@@ -57,57 +69,41 @@ const CustomPlayerBar = () => {
       return true;
     }
 
-    // Get player bar height for positioning
-    const playerBarHeight = playerBar.offsetHeight || 72;
-
     // Create our custom player bar container
     const customPlayerBar = document.createElement('div');
     customPlayerBar.className = 'ytmusic-custom-player-bar';
+    
     const updatePlayerBarStyle = (collapsed) => {
       if (collapsed) {
         customPlayerBar.style.cssText = `
-          position: fixed;
-          left: 16px;
-          bottom: ${playerBarHeight + 16}px;
           display: flex;
           align-items: center;
           gap: 8px;
-          background: rgba(3, 3, 3, 0.98);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 16px;
-          padding: 12px;
-          z-index: 9999;
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-          border-top: 2px solid rgba(255, 23, 68, 0.4);
-          transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-          transform: translateY(0);
-          pointer-events: auto;
-          font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+          margin-left: 12px;
+          padding: 6px 8px;
+          background: rgba(0, 0, 0, 0.3);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          font-family: 'YouTube Sans', 'Roboto', sans-serif;
           color: #ffffff;
         `;
       } else {
         customPlayerBar.style.cssText = `
-          position: fixed;
-          left: 16px;
-          bottom: ${playerBarHeight + 16}px;
           display: flex;
           align-items: center;
           gap: 12px;
-          background: rgba(3, 3, 3, 0.98);
-          backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 16px;
-          padding: 16px 20px;
-          z-index: 9999;
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-          border-top: 2px solid rgba(255, 23, 68, 0.4);
-          transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-          transform: translateY(0);
-          pointer-events: auto;
-          font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+          margin-left: 12px;
+          padding: 8px 12px;
+          background: rgba(0, 0, 0, 0.3);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          font-family: 'YouTube Sans', 'Roboto', sans-serif;
           color: #ffffff;
-          min-width: 280px;
+          min-width: 240px;
         `;
       }
     };
@@ -122,7 +118,7 @@ const CustomPlayerBar = () => {
       container.style.cssText = `
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
       `;
 
       // Create add marker button
@@ -133,18 +129,17 @@ const CustomPlayerBar = () => {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
+        width: 28px;
+        height: 28px;
         background: linear-gradient(135deg, #ff1744, #d50000);
-        border: 1px solid rgba(255, 23, 68, 0.8);
-        border-radius: 10px;
+        border: none;
+        border-radius: 8px;
         color: #ffffff;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 16px rgba(255, 23, 68, 0.4);
-        font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
       `;
 
       addMarkerButton.textContent = '+';
@@ -157,20 +152,18 @@ const CustomPlayerBar = () => {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 10px;
+        width: 28px;
+        height: 28px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 8px;
         color: rgba(255, 255, 255, 0.9);
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        backdrop-filter: blur(8px);
-        font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        transition: all 0.2s ease;
       `;
 
       expandButton.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="6,9 12,15 18,9"></polyline>
         </svg>
       `;
@@ -190,30 +183,26 @@ const CustomPlayerBar = () => {
       // Add hover effects
       addMarkerButton.addEventListener('mouseenter', () => {
         if (!addMarkerButton.disabled) {
-          addMarkerButton.style.transform = 'translateY(-2px)';
-          addMarkerButton.style.boxShadow = '0 6px 20px rgba(255, 23, 68, 0.5)';
+          addMarkerButton.style.transform = 'scale(1.05)';
+          addMarkerButton.style.boxShadow = '0 4px 12px rgba(255, 23, 68, 0.4)';
         }
       });
 
       addMarkerButton.addEventListener('mouseleave', () => {
         if (!addMarkerButton.disabled) {
-          addMarkerButton.style.transform = 'translateY(0)';
-          addMarkerButton.style.boxShadow = '0 4px 16px rgba(255, 23, 68, 0.4)';
+          addMarkerButton.style.transform = 'scale(1)';
+          addMarkerButton.style.boxShadow = '0 2px 8px rgba(255, 23, 68, 0.3)';
         }
       });
 
       expandButton.addEventListener('mouseenter', () => {
-        expandButton.style.background = 'rgba(255, 255, 255, 0.12)';
-        expandButton.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-        expandButton.style.transform = 'translateY(-2px)';
-        expandButton.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.3)';
+        expandButton.style.background = 'rgba(255, 255, 255, 0.15)';
+        expandButton.style.transform = 'scale(1.05)';
       });
 
       expandButton.addEventListener('mouseleave', () => {
-        expandButton.style.background = 'rgba(255, 255, 255, 0.08)';
-        expandButton.style.borderColor = 'rgba(255, 255, 255, 0.12)';
-        expandButton.style.transform = 'translateY(0)';
-        expandButton.style.boxShadow = 'none';
+        expandButton.style.background = 'rgba(255, 255, 255, 0.1)';
+        expandButton.style.transform = 'scale(1)';
       });
 
       container.appendChild(addMarkerButton);
@@ -222,14 +211,14 @@ const CustomPlayerBar = () => {
       return container;
     };
 
-    // Create expanded view (full controls)
+    // Create expanded view (full controls) - similar to before but with smaller dimensions
     const createExpandedView = () => {
       const container = document.createElement('div');
       container.className = 'ytmusic-expanded-content';
       container.style.cssText = `
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
         width: 100%;
       `;
 
@@ -241,21 +230,19 @@ const CustomPlayerBar = () => {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 8px;
+        width: 24px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 6px;
         color: rgba(255, 255, 255, 0.9);
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.2s ease;
         flex-shrink: 0;
-        backdrop-filter: blur(8px);
-        font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
       `;
 
       collapseButton.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="18,15 12,9 6,15"></polyline>
         </svg>
       `;
@@ -266,42 +253,23 @@ const CustomPlayerBar = () => {
         renderCollapsedView();
       });
 
-      // Add hover effect for collapse button
-      collapseButton.addEventListener('mouseenter', () => {
-        collapseButton.style.background = 'rgba(255, 255, 255, 0.12)';
-        collapseButton.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-        collapseButton.style.transform = 'translateY(-1px)';
-        collapseButton.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
-      });
-
-      collapseButton.addEventListener('mouseleave', () => {
-        collapseButton.style.background = 'rgba(255, 255, 255, 0.08)';
-        collapseButton.style.borderColor = 'rgba(255, 255, 255, 0.12)';
-        collapseButton.style.transform = 'translateY(0)';
-        collapseButton.style.boxShadow = 'none';
-      });
-
-      // Create speed control container
+      // Speed control container - smaller version
       const speedContainer = document.createElement('div');
       speedContainer.className = 'ytmusic-custom-speed';
       speedContainer.style.cssText = `
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-size: 11px;
+        gap: 6px;
+        font-size: 10px;
         color: rgba(255, 255, 255, 0.9);
-        font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
       `;
 
       const speedLabel = document.createElement('span');
-      speedLabel.textContent = 'SPEED';
+      speedLabel.textContent = 'Speed';
       speedLabel.style.cssText = `
         font-weight: 500;
-        opacity: 0.7;
-        min-width: 40px;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        opacity: 0.8;
+        font-size: 9px;
       `;
 
       const speedSlider = document.createElement('input');
@@ -312,9 +280,9 @@ const CustomPlayerBar = () => {
       speedSlider.value = speed;
       speedSlider.className = 'ytmusic-custom-speed-slider';
       speedSlider.style.cssText = `
-        width: 80px;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.12);
+        width: 60px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.15);
         border-radius: 2px;
         outline: none;
         cursor: pointer;
@@ -324,66 +292,53 @@ const CustomPlayerBar = () => {
       const speedValue = document.createElement('span');
       speedValue.textContent = `${speed}x`;
       speedValue.style.cssText = `
-        min-width: 28px;
+        min-width: 22px;
         font-weight: 600;
         text-align: center;
         color: #ff1744;
-        font-size: 11px;
-        font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 10px;
       `;
 
       speedContainer.appendChild(speedLabel);
       speedContainer.appendChild(speedSlider);
       speedContainer.appendChild(speedValue);
 
-      // Create separator
-      const separator = document.createElement('div');
-      separator.style.cssText = `
-        width: 1px;
-        height: 20px;
-        background: rgba(255, 255, 255, 0.12);
-      `;
-
-      // Create add marker button
+      // Create add marker button - smaller version
       const markerButton = document.createElement('button');
       markerButton.className = 'ytmusic-custom-marker-btn';
       markerButton.style.cssText = `
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
-        padding: 10px 14px;
+        gap: 4px;
+        padding: 6px 10px;
         background: linear-gradient(135deg, #ff1744, #d50000);
-        border: 1px solid rgba(255, 23, 68, 0.8);
-        border-radius: 10px;
+        border: none;
+        border-radius: 8px;
         color: #ffffff;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 500;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 16px rgba(255, 23, 68, 0.4);
-        position: relative;
-        overflow: hidden;
-        font-family: 'YouTube Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(255, 23, 68, 0.3);
         flex: 1;
-        backdrop-filter: blur(8px);
       `;
 
       const markerIcon = document.createElement('span');
       markerIcon.innerHTML = `
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="12" y1="5" x2="12" y2="19"></line>
           <line x1="5" y1="12" x2="19" y2="12"></line>
         </svg>
       `;
 
       const markerText = document.createElement('span');
-      markerText.textContent = 'Add Marker';
+      markerText.textContent = 'Marker';
 
       markerButton.appendChild(markerIcon);
       markerButton.appendChild(markerText);
 
-      // Add event listeners
+      // Add event listeners for expanded view
       speedSlider.addEventListener('input', (e) => {
         e.stopPropagation();
         const value = parseFloat(e.target.value);
@@ -400,44 +355,30 @@ const CustomPlayerBar = () => {
         }
       });
 
-      speedSlider.addEventListener('click', (e) => {
-        e.stopPropagation();
-      });
-
       markerButton.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation();
-
         if (markerButton.disabled) return;
-
         handleMarkerAdd(markerButton, markerIcon, markerText);
       });
 
       // Add hover effects
       markerButton.addEventListener('mouseenter', () => {
         if (!markerButton.disabled) {
-          markerButton.style.transform = 'translateY(-2px)';
-          markerButton.style.boxShadow = '0 6px 20px rgba(255, 23, 68, 0.5)';
-          markerButton.style.background =
-            'linear-gradient(135deg, #ff1744, #d50000)';
-          markerButton.style.borderColor = 'rgba(255, 23, 68, 0.9)';
+          markerButton.style.transform = 'scale(1.05)';
+          markerButton.style.boxShadow = '0 4px 12px rgba(255, 23, 68, 0.4)';
         }
       });
 
       markerButton.addEventListener('mouseleave', () => {
         if (!markerButton.disabled) {
-          markerButton.style.transform = 'translateY(0)';
-          markerButton.style.boxShadow = '0 4px 16px rgba(255, 23, 68, 0.4)';
-          markerButton.style.background =
-            'linear-gradient(135deg, #ff1744, #d50000)';
-          markerButton.style.borderColor = 'rgba(255, 23, 68, 0.8)';
+          markerButton.style.transform = 'scale(1)';
+          markerButton.style.boxShadow = '0 2px 8px rgba(255, 23, 68, 0.3)';
         }
       });
 
       container.appendChild(collapseButton);
       container.appendChild(speedContainer);
-      container.appendChild(separator);
       container.appendChild(markerButton);
 
       return container;
@@ -560,44 +501,28 @@ const CustomPlayerBar = () => {
       customPlayerBar.appendChild(createExpandedView());
     };
 
-    // Add custom styles for the slider thumb
+    // Update slider styles for smaller version
     if (!document.querySelector('#custom-slider-styles')) {
       const style = document.createElement('style');
       style.id = 'custom-slider-styles';
       style.textContent = `
         .ytmusic-custom-speed-slider::-webkit-slider-thumb {
           -webkit-appearance: none;
-          width: 14px;
-          height: 14px;
+          width: 10px;
+          height: 10px;
           border-radius: 50%;
           background: linear-gradient(135deg, #ff1744, #d50000);
           cursor: pointer;
-          box-shadow: 0 2px 6px rgba(255, 23, 68, 0.4);
+          box-shadow: 0 1px 4px rgba(255, 23, 68, 0.4);
           transition: all 0.2s ease;
-          border: 1px solid rgba(255, 23, 68, 0.8);
+          border: none;
         }
         .ytmusic-custom-speed-slider::-webkit-slider-thumb:hover {
-          transform: scale(1.1);
-          box-shadow: 0 4px 12px rgba(255, 23, 68, 0.6);
-        }
-        .ytmusic-custom-speed-slider::-moz-range-thumb {
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #ff1744, #d50000);
-          cursor: pointer;
-          border: 1px solid rgba(255, 23, 68, 0.8);
-          box-shadow: 0 2px 6px rgba(255, 23, 68, 0.4);
-        }
-        .ytmusic-custom-speed-slider {
-          background: rgba(255, 255, 255, 0.12) !important;
+          transform: scale(1.2);
+          box-shadow: 0 2px 8px rgba(255, 23, 68, 0.6);
         }
         .ytmusic-custom-speed-slider::-webkit-slider-track {
-          background: rgba(255, 255, 255, 0.12);
-          border-radius: 2px;
-        }
-        .ytmusic-custom-speed-slider::-moz-range-track {
-          background: rgba(255, 255, 255, 0.12);
+          background: rgba(255, 255, 255, 0.15);
           border-radius: 2px;
         }
       `;
@@ -609,17 +534,6 @@ const CustomPlayerBar = () => {
       e.stopPropagation();
     });
 
-    // Add hover effect
-    customPlayerBar.addEventListener('mouseenter', () => {
-      customPlayerBar.style.transform = 'translateY(-2px)';
-      customPlayerBar.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.5)';
-    });
-
-    customPlayerBar.addEventListener('mouseleave', () => {
-      customPlayerBar.style.transform = 'translateY(0)';
-      customPlayerBar.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.4)';
-    });
-
     // Initial render based on state
     if (isCollapsed) {
       renderCollapsedView();
@@ -627,13 +541,12 @@ const CustomPlayerBar = () => {
       renderExpandedView();
     }
 
-    // Inject into the page
-    document.body.appendChild(customPlayerBar);
+    // Inject into the right controls container of the native player bar
+    rightControls.appendChild(customPlayerBar);
 
-    console.log('Custom player bar injected successfully');
+    console.log('Custom player bar injected successfully into native player bar');
     return true;
-  }, []); // Remove dependencies to prevent re-creation
-
+  }, []);
   useEffect(() => {
     let retryCount = 0;
     const maxRetries = 10;

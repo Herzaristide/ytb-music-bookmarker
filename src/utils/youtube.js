@@ -5,11 +5,30 @@ export const getVideoId = () => {
 };
 
 export const getVideoTitle = () => {
-  const titleElement =
-    document.querySelector('yt-formatted-string.title') ||
-    document.querySelector('.content-info-wrapper .title') ||
-    document.querySelector('h1.ytmusic-player-bar-text-title');
-  return titleElement ? titleElement.textContent.trim() : 'Unknown Title';
+  // Try multiple selectors to find the video title
+  const selectors = [
+    'yt-formatted-string.title.style-scope.ytmusic-player-bar',
+    'yt-formatted-string.title',
+    '.content-info-wrapper .title',
+    'h1.ytmusic-player-bar-text-title',
+    '.ytmusic-player-bar .title',
+    'ytmusic-player-bar .content-info-wrapper .title',
+    '[class*="title"][class*="ytmusic-player-bar"]',
+  ];
+
+  for (const selector of selectors) {
+    const titleElement = document.querySelector(selector);
+    if (titleElement && titleElement.textContent.trim()) {
+      return titleElement.textContent.trim();
+    }
+  }
+
+  // Fallback to document title if available
+  if (document.title && document.title !== 'YouTube Music') {
+    return document.title.replace(' - YouTube Music', '');
+  }
+
+  return 'Unknown Title';
 };
 
 export const getCurrentTime = () => {
